@@ -1,0 +1,5142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reto Interbiz 2035 - ANDINA GLOW</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://public.codepenassets.com/css/normalize-5.0.0.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap');
+
+    :root {
+      --gold: #ffd700;
+      --border: rgba(255, 215, 0, 0.25);
+      --theme-bg-sky: radial-gradient(ellipse at top, #16213e 0%, #071324 70%);
+    }
+
+    body[data-theme="Japón"] { --theme-bg-sky: radial-gradient(ellipse at top, #1b263b 0%, #0d1b2a 70%); }
+    body[data-theme="Alemania"] { --theme-bg-sky: radial-gradient(ellipse at top, #1a2f1c 0%, #09170a 70%); }
+    body[data-theme="Emiratos Árabes Unidos"] { --theme-bg-sky: radial-gradient(ellipse at top, #3a2500 0%, #170d00 70%); }
+    body[data-theme="Estados Unidos"] { --theme-bg-sky: radial-gradient(ellipse at top, #1d2a44 0%, #0b1326 70%); }
+    body[data-theme="China"] { --theme-bg-sky: radial-gradient(ellipse at top, #3b1414 0%, #1a0808 70%); }
+    body[data-theme="Corea del Sur"] { --theme-bg-sky: radial-gradient(ellipse at top, #2d1b36 0%, #120a17 70%); }
+
+    body {
+      font-family: 'Rajdhani', sans-serif;
+      background: linear-gradient(180deg, #071324 0%, #0e1e3a 100%);
+      color: #eaf0ff;
+      min-height: 100vh;
+      perspective: 1000px;
+    }
+
+    .font-orbitron { font-family: 'Orbitron', sans-serif; }
+    .bg-animated { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+    .bg-sky { position: absolute; inset: 0; background: var(--theme-bg-sky); transition: background 1s ease; }
+    
+    .screen { display: none; opacity: 0; transform: translateY(20px); transition: opacity .4s ease, transform .4s ease; }
+    .screen.active { display: block; opacity: 1; transform: translateY(0); }
+
+    .glass-card {
+      background: linear-gradient(145deg, rgba(18,26,46,.85), rgba(10,14,26,.85));
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      backdrop-filter: blur(8px);
+    }
+
+    .choice-btn {
+      background: rgba(255,255,255,.03);
+      border: 2px solid rgba(255,255,255,.1);
+      border-radius: 0.75rem;
+      padding: 0.6rem 0.8rem;
+      transition: all 0.2s ease;
+    }
+    .choice-btn:hover { border-color: var(--gold); background: rgba(255,215,0,.08); }
+    .choice-btn.selected { border-color: var(--gold); background: rgba(255,215,0,.15); box-shadow: 0 0 15px rgba(255,215,0,.3); }
+
+    .main-btn {
+      background: linear-gradient(135deg, #ffd700, #ffc83d);
+      color: #0a0e1a;
+      font-weight: 700;
+      border-radius: 0.75rem;
+      padding: 0.75rem 2rem;
+      font-family: 'Orbitron';
+      transition: all 0.2s;
+    }
+    .main-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(255,215,0,0.4); }
+    .main-btn.secondary { background: rgba(255,255,255,.08); color: #eaf0ff; border: 1px solid var(--border); }
+
+    .cell {
+      background: linear-gradient(145deg, rgba(26,35,64,.9), rgba(15,21,40,.9));
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 0.5rem;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: all .3s ease;
+    }
+    .cell.active-cell { transform: scale(1.06); z-index: 5; box-shadow: 0 0 20px rgba(255,215,0,.6); border-color: var(--gold) !important; }
+
+    .token-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2px solid #ffffff;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.6);
+      background: #0f172a;
+      overflow: hidden;
+      display: inline-block;
+    }
+
+    .dice-container {
+      perspective: 800px;
+      display: inline-block;
+      cursor: pointer;
+    }
+    .dice-3d {
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, #ffffff, #e2e8f0);
+      color: #0f172a;
+      border: 3px solid #ffd700;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      font-weight: bold;
+      transform-style: preserve-3d;
+      transition: transform 0.2s ease;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5), inset 0 0 15px rgba(255,215,0,0.3);
+    }
+    .dice-3d.rolling {
+      animation: dice3dSpin 1.4s cubic-bezier(0.15, 0.85, 0.35, 1.2) infinite;
+      box-shadow: 0 0 40px rgba(255, 215, 0, 0.9), inset 0 0 25px rgba(255,215,0,0.6);
+      border-color: #ffffff;
+    }
+
+    @keyframes dice3dSpin {
+      0% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1); }
+      33% { transform: rotateX(360deg) rotateY(180deg) rotateZ(90deg) scale(1.15); }
+      66% { transform: rotateX(720deg) rotateY(360deg) rotateZ(180deg) scale(0.9); }
+      100% { transform: rotateX(1080deg) rotateY(540deg) rotateZ(360deg) scale(1); }
+    }
+
+    .modal {
+      position: fixed; inset: 0; background: rgba(0,0,0,.8);
+      display: flex; align-items: center; justify-content: center;
+      padding: 1rem; z-index: 1000; opacity: 0; pointer-events: none;
+      transition: opacity .3s ease;
+    }
+    .modal.open { opacity: 1; pointer-events: auto; backdrop-filter: blur(6px); }
+
+    .has-tooltip { text-decoration: underline dotted var(--gold); cursor: help; }
+    .tooltip-popup {
+      position: absolute; z-index: 99999; background: #0e172a; color: #e2e8f0;
+      border: 1px solid var(--gold); padding: 8px 12px; border-radius: 8px;
+      font-size: .75rem; max-width: 220px; box-shadow: 0 10px 25px rgba(0,0,0,.8);
+      pointer-events: none; transition: opacity .2s ease;
+    }
+    .tooltip-popup.hidden { opacity: 0; display: none; }
+  </style>
+</head>
+<body class="p-4">
+<div id="app" class="relative z-10 max-w-6xl mx-auto min-h-screen flex flex-col justify-center">
+
+  <div class="bg-animated"><div class="bg-sky"></div></div>
+
+  <!-- PANTALLA 0: PORTADA -->
+  <section id="screenCover" class="screen active">
+    <div class="glass-card max-w-2xl mx-auto p-8 text-center border-amber-400/40">
+      <div class="font-orbitron text-xs tracking-widest text-amber-400 mb-2">SIMULACIÓN Y PROSPECTIVA INTERNACIONAL</div>
+      <div class="text-6xl mb-3">🌿</div>
+      <h1 class="font-orbitron text-4xl font-black text-amber-400 mb-2">RETO INTERBIZ <span class="text-white">2035</span></h1>
+      <h2 class="font-orbitron text-base text-slate-400 tracking-wider mb-4">EXPEDICIÓN A MERCADOS GLOBALES</h2>
+      <div class="w-24 h-0.5 bg-amber-400 mx-auto mb-4"></div>
+      <p class="font-orbitron text-emerald-400 font-bold mb-2">ANDINA GLOW · Cosmética Natural Amazónica</p>
+      <p class="text-slate-300 italic mb-6">Una aventura estratégica para conquistar el mundo</p>
+      <button id="coverNextBtn" class="main-btn">COMENZAR EXPEDICIÓN ➡</button>
+    </div>
+  </section>
+
+  <!-- PANTALLA 1: INICIO -->
+  <section id="screenIntro" class="screen">
+    <div class="glass-card max-w-3xl mx-auto p-8 text-center">
+      <div class="font-orbitron text-xs tracking-widest text-amber-400 mb-2">INTRODUCCIÓN Y MARCO ESTRATÉGICO</div>
+      <h1 class="font-orbitron text-3xl font-black mb-4">BIENVENIDOS A <span class="text-amber-400">ANDINA GLOW 2035</span></h1>
+
+      <div class="flex items-center justify-center gap-4 bg-emerald-950/40 border border-emerald-500/30 p-4 rounded-xl max-w-md mx-auto mb-6">
+        <div class="text-3xl">🌿</div>
+        <div class="text-left">
+          <strong class="font-orbitron text-emerald-400 block">STARTUP COLOMBIANA</strong>
+          <span class="text-xs text-slate-400">Innovación con extractos amazónicos</span>
+        </div>
+      </div>
+
+      <div class="text-slate-300 text-sm space-y-3 text-left mb-6 leading-relaxed max-w-2xl mx-auto">
+        <p><strong>ANDINA GLOW</strong> se encuentra en un punto de inflexión histórico rumbo al año 2035. Como junta directiva y equipo de estrategas internacionales, su misión consiste en llevar la cosmética natural basada en manteca de copoazú, aceite de açaí y buriti a los mercados más competitivos del planeta (Japón, Alemania, Emiratos Árabes Unidos, Estados Unidos, China y Corea del Sur).</p>
+        <p>A lo largo de este recorrido, no solo deberán superar estrictas normativas sanitarias, aduaneras y arancelarias actualizadas, sino también administrar con máxima cautela su <strong>Capital Estratégico</strong> y su <strong>Reputación ESG (Ambiental, Social y de Gobernanza)</strong> frente a imprevistos internacionales y crisis logísticas.</p>
+      </div>
+
+      <button id="startBtn" class="main-btn">CONFIGURAR EQUIPOS ➡</button>
+    </div>
+  </section>
+
+  <!-- PANTALLA 2: JUGADORES Y DIFICULTAD -->
+  <section id="screenPlayers" class="screen">
+    <div class="text-center mb-6">
+      <div class="font-orbitron text-xs text-amber-400 tracking-widest">FASE DE EQUIPO</div>
+      <h2 class="font-orbitron text-2xl font-black">Los estrategas y la dificultad</h2>
+    </div>
+
+    <div id="playersSetup" class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto mb-6"></div>
+
+    <div class="glass-card max-w-2xl mx-auto p-4 text-center mb-6">
+      <h3 class="font-orbitron text-amber-400 text-sm mb-3">Nivel de Dificultad</h3>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+        <button class="choice-btn diff-btn selected text-left" data-diff="Junior">
+          <strong class="block text-xs font-orbitron">JUNIOR</strong>
+          <span class="text-[10px] text-slate-400">Penalizaciones normales</span>
+        </button>
+        <button class="choice-btn diff-btn text-left" data-diff="Consultor">
+          <strong class="block text-xs font-orbitron">CONSULTOR</strong>
+          <span class="text-[10px] text-slate-400">Penalizaciones +25%</span>
+        </button>
+        <button class="choice-btn diff-btn text-left" data-diff="Director Global">
+          <strong class="block text-xs font-orbitron">DIRECTOR GLOBAL</strong>
+          <span class="text-[10px] text-slate-400">Penalizaciones dobles</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="text-center">
+      <button id="continuePlayersBtn" class="main-btn">CONTINUAR</button>
+    </div>
+  </section>
+
+  <!-- PANTALLA 3: CONFIGURACIÓN -->
+  <section id="screenSetup" class="screen">
+    <div class="text-center mb-6">
+      <div class="font-orbitron text-xs text-amber-400 tracking-widest">PREPARACIÓN INTERNACIONAL</div>
+      <h2 class="font-orbitron text-2xl font-black">Construyan su estrategia</h2>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <!-- 1. Mercado -->
+      <div class="glass-card p-4">
+        <h3 class="font-orbitron text-amber-400 text-sm mb-3">1. Mercado objetivo</h3>
+        <div class="space-y-2">
+          <button class="choice-btn market-btn w-full text-left" data-market="Japón">
+            <strong class="block text-xs">🇯🇵 JAPÓN</strong><span class="text-[10px] text-slate-400">Clean beauty · Estándar JAS</span>
+          </button>
+          <button class="choice-btn market-btn w-full text-left" data-market="Alemania">
+            <strong class="block text-xs">🇩🇪 ALEMANIA</strong><span class="text-[10px] text-slate-400">Cosmética natural · CPNP/UE</span>
+          </button>
+          <button class="choice-btn market-btn w-full text-left" data-market="Emiratos Árabes Unidos">
+            <strong class="block text-xs">🇦🇪 EMIRATOS ÁRABES</strong><span class="text-[10px] text-slate-400">Lujo · Certificado Halal</span>
+          </button>
+          <button class="choice-btn market-btn w-full text-left" data-market="Estados Unidos">
+            <strong class="block text-xs">🇺🇸 ESTADOS UNIDOS</strong><span class="text-[10px] text-slate-400">TLC vigente · Normativa MoCRA</span>
+          </button>
+          <button class="choice-btn market-btn w-full text-left" data-market="China">
+            <strong class="block text-xs">🇨🇳 CHINA</strong><span class="text-[10px] text-slate-400">Gran volumen · Registro NMPA</span>
+          </button>
+          <button class="choice-btn market-btn w-full text-left" data-market="Corea del Sur">
+            <strong class="block text-xs">🇰🇷 COREA DEL SUR</strong><span class="text-[10px] text-slate-400">K-Beauty hub · Normativa MFDS</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 2. Estrategia de Entrada -->
+      <div class="glass-card p-4">
+        <h3 class="font-orbitron text-amber-400 text-sm mb-3">2. Estrategia de entrada</h3>
+        <div class="space-y-2">
+          <button class="choice-btn entry-btn w-full text-left" data-entry="Exportación Directa">
+            <strong class="block text-xs">EXPORTACIÓN DIRECTA</strong><span class="text-[10px] text-slate-400">Control propio · Cap. +0</span>
+          </button>
+          <button class="choice-btn entry-btn w-full text-left" data-entry="Alianza Estratégica">
+            <strong class="block text-xs">ALIANZA ESTRATÉGICA</strong><span class="text-[10px] text-slate-400">Socio local · Cap. +2</span>
+          </button>
+          <button class="choice-btn entry-btn w-full text-left" data-entry="Licenciamiento / Franquicia">
+            <strong class="block text-xs">LICENCIAMIENTO</strong><span class="text-[10px] text-slate-400">Menor riesgo · Cap. +3</span>
+          </button>
+          <button class="choice-btn entry-btn w-full text-left" data-entry="Joint Venture">
+            <strong class="block text-xs">JOINT VENTURE</strong><span class="text-[10px] text-slate-400">Empresa conjunta · Cap. +5</span>
+          </button>
+          <button class="choice-btn entry-btn w-full text-left" data-entry="Inversión Extranjera">
+            <strong class="block text-xs">INVERSIÓN EXTRANJERA</strong><span class="text-[10px] text-slate-400">Alto control · Cap. +8</span>
+          </button>
+          <button class="choice-btn entry-btn w-full text-left" data-entry="Filial Propia">
+            <strong class="block text-xs">FILIAL PROPIA</strong><span class="text-[10px] text-slate-400">100% ANDINA GLOW · Cap. +10</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 3. Incoterm -->
+      <div class="glass-card p-4">
+        <h3 class="font-orbitron text-amber-400 text-sm mb-3">3. <span class="has-tooltip" data-tooltip="Reglas internacionales que definen responsabilidades y costos de entrega.">Incoterm</span> Logístico</h3>
+        <div class="space-y-2">
+          <button class="choice-btn incoterm-btn w-full text-left" data-incoterm="EXW" data-pros="Mínima responsabilidad operativa en origen." data-cons="Cero control sobre el canal logístico final en destino." data-cap="0">
+            <strong class="block text-xs">EXW (En Fábrica)</strong><span class="text-[10px] text-slate-400">Capital +0 · Riesgo mínimo</span>
+          </button>
+          <button class="choice-btn incoterm-btn w-full text-left" data-incoterm="FCA" data-pros="Entrega al transportista del comprador en origen." data-cons="El comprador asume el flete internacional." data-cap="2">
+            <strong class="block text-xs">FCA (Free Carrier)</strong><span class="text-[10px] text-slate-400">Capital +2 · Despacho exportación</span>
+          </button>
+          <button class="choice-btn incoterm-btn w-full text-left" data-incoterm="FOB" data-pros="Control y costo hasta cargar en puerto colombiano." data-cons="El comprador controla el flete marítimo." data-cap="3">
+            <strong class="block text-xs">FOB (Free on Board)</strong><span class="text-[10px] text-slate-400">Capital +3 · Equilibrio logístico</span>
+          </button>
+          <button class="choice-btn incoterm-btn w-full text-left" data-incoterm="CIF" data-pros="ANDINA GLOW gestiona flete y seguro hasta puerto destino." data-cons="Exposición a fluctuaciones de fletes globales." data-cap="5">
+            <strong class="block text-xs">CIF (Cost, Insurance & Freight)</strong><span class="text-[10px] text-slate-400">Capital +5 · Control de flete</span>
+          </button>
+          <button class="choice-btn incoterm-btn w-full text-left" data-incoterm="CIP" data-pros="Cobertura multimodal completa con seguro." data-cons="Mayor costo inicial de seguro a cargo del exportador." data-cap="6">
+            <strong class="block text-xs">CIP (Carriage & Insurance Paid)</strong><span class="text-[10px] text-slate-400">Capital +6 · Cobertura amplia</span>
+          </button>
+          <button class="choice-btn incoterm-btn w-full text-left" data-incoterm="DDP" data-pros="Servicio integral llave en mano para el cliente." data-cons="Máximo riesgo aduanero y fiscal en destino." data-cap="8">
+            <strong class="block text-xs">DDP (Delivered Duty Paid)</strong><span class="text-[10px] text-slate-400">Capital +8 · Control total entrega</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="incotermInfoBox" class="glass-card p-4 max-w-xl mx-auto text-left hidden mb-6">
+      <h4 id="incotermName" class="font-orbitron text-amber-400 text-sm mb-1">INCOTERM</h4>
+      <p class="text-xs text-slate-300"><strong>Ventajas:</strong> <span id="incotermPros">-</span></p>
+      <p class="text-xs text-slate-300"><strong>Contras:</strong> <span id="incotermCons">-</span></p>
+    </div>
+
+    <div class="text-center">
+      <button id="startGameBtn" class="main-btn">INICIAR DIAGNÓSTICO PESTEL</button>
+    </div>
+  </section>
+
+  <!-- PANTALLA 3.5: PESTEL -->
+  <section id="screenPestel" class="screen">
+    <div class="text-center mb-6">
+      <div class="font-orbitron text-xs text-amber-400 tracking-widest">DIAGNÓSTICO ESTRATÉGICO DE ENTORNO</div>
+      <h2 id="pestelTitle" class="font-orbitron text-2xl font-black">📊 ANÁLISIS <span class="has-tooltip" data-tooltip="Análisis Político, Económico, Social, Tecnológico, Ecológico y Legal.">PESTEL</span></h2>
+      <p id="pestelSubtitle" class="text-amber-400 font-bold text-sm mt-1">País Seleccionado: <span id="pestelCountryName" class="text-slate-100 font-orbitron"></span></p>
+    </div>
+
+    <div id="pestelGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto mb-6"></div>
+
+    <div class="flex justify-center gap-4 flex-wrap">
+      <button id="backPestelBtn" class="main-btn secondary">← CONFIGURACIÓN</button>
+      <button id="readPestelBtn" class="main-btn secondary">🎙 LECTURA POR VOZ</button>
+      <button id="continuePestelBtn" class="main-btn">INICIAR PARTIDA 🏁</button>
+    </div>
+  </section>
+
+  <!-- PANTALLA 4: JUEGO -->
+  <section id="screenGame" class="screen">
+    <header class="glass-card p-3 mb-4 flex flex-wrap items-center justify-between gap-2">
+      <div>
+        <div class="font-orbitron text-[10px] text-amber-400 tracking-widest">ANDINA GLOW · RETO INTERBIZ 2035</div>
+        <h2 id="marketTitle" class="font-orbitron text-sm font-bold">Expedición Internacional</h2>
+        <div class="flex flex-wrap gap-2 text-[11px] text-slate-400 mt-1">
+          <span id="marketInfo" class="bg-amber-400/10 px-2 py-0.5 rounded">Mercado: —</span>
+          <span id="entryInfo" class="bg-amber-400/10 px-2 py-0.5 rounded">Entrada: —</span>
+          <span id="incotermInfo" class="bg-amber-400/10 px-2 py-0.5 rounded">Incoterm: —</span>
+          <span id="diffInfo" class="bg-amber-400/10 px-2 py-0.5 rounded">Dificultad: Junior</span>
+          <span id="yearInfo" class="bg-amber-400/10 px-2 py-0.5 rounded">Año: 2026</span>
+        </div>
+      </div>
+      <div class="flex gap-2">
+        <button id="muteBtn" class="text-xs bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-lg">🔊 Voz/SFX</button>
+        <button id="restartBtn" class="text-xs bg-rose-900/60 border border-rose-700 px-3 py-1.5 rounded-lg">↻ Reiniciar</button>
+      </div>
+    </header>
+
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
+      <div class="lg:col-span-3 glass-card p-3 flex flex-col justify-between">
+        <div class="flex justify-between items-center bg-amber-400/10 border-l-4 border-amber-400 p-2 rounded mb-3">
+          <span class="text-xs text-slate-400 font-orbitron">Turno Actual:</span>
+          <strong id="turnName" class="font-orbitron text-amber-400 text-sm">—</strong>
+        </div>
+        
+        <div id="board" class="grid grid-cols-5 gap-2 my-auto"></div>
+
+        <div class="flex justify-center gap-4 text-xs text-slate-400 mt-3 pt-2 border-t border-slate-800">
+          <span>❓ Decisión</span>
+          <span>⚡ Evento</span>
+          <span>🏁 2035 Meta</span>
+        </div>
+      </div>
+
+      <aside class="space-y-3">
+        <div class="glass-card p-3">
+          <h3 class="font-orbitron text-amber-400 text-xs tracking-wider mb-2">JUGADORES</h3>
+          <div id="playersPanel" class="space-y-2"></div>
+        </div>
+
+        <div class="glass-card p-3 text-center">
+          <h3 class="font-orbitron text-amber-400 text-xs tracking-wider mb-1">DADO 3D / 4D</h3>
+          <p class="text-[10px] text-slate-400 mb-2">Haz clic para rodar</p>
+          <div class="flex items-center justify-center py-2">
+            <div class="dice-container">
+              <div id="mainDice" class="dice-3d select-none">🎲</div>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- MODAL PREGUNTA -->
+  <div id="questionModal" class="modal">
+    <div class="glass-card max-w-lg w-full p-6 text-left">
+      <div class="font-orbitron text-[10px] text-amber-400 tracking-widest mb-1 uppercase">DECISIÓN ESTRATÉGICA</div>
+      <h2 id="questionTitle" class="font-orbitron text-base font-bold mb-2">Pregunta</h2>
+      <p id="questionText" class="text-xs sm:text-sm text-slate-300 leading-relaxed mb-4"></p>
+      <div id="answers" class="space-y-2"></div>
+      <div id="questionFeedback" class="mt-4"></div>
+    </div>
+  </div>
+
+  <!-- MODAL EVENTO -->
+  <div id="eventModal" class="modal">
+    <div class="glass-card max-w-lg w-full p-6 text-left">
+      <div class="font-orbitron text-[10px] text-amber-400 tracking-widest mb-1 uppercase">⚡ EVENTO INTERNACIONAL</div>
+      <h2 id="eventTitle" class="font-orbitron text-base font-bold mb-2 text-amber-400"></h2>
+      <p id="eventText" class="text-xs sm:text-sm text-slate-300 leading-relaxed mb-4"></p>
+      <div id="eventChoices" class="space-y-2"></div>
+      <div id="eventFeedback" class="mt-4"></div>
+    </div>
+  </div>
+
+  <!-- PANTALLA FINAL -->
+  <section id="screenFinal" class="screen">
+    <div class="glass-card max-w-3xl mx-auto p-8 text-center border-amber-400/50">
+      <div class="font-orbitron text-xs text-amber-400 tracking-widest mb-2">AÑO 2035</div>
+      <h1 class="font-orbitron text-3xl font-black text-amber-400 mb-2">EXPEDICIÓN COMPLETADA</h1>
+      <p class="text-slate-300 text-sm mb-6">Todos los estrategas han finalizado el recorrido hacia la internacionalización de ANDINA GLOW.</p>
+
+      <div id="podium" class="flex justify-center items-end gap-3 mb-6"></div>
+
+      <div class="flex justify-center gap-4">
+        <button id="playAgainBtn" class="main-btn">VOLVER A JUGAR</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div id="globalTooltip" class="tooltip-popup hidden"></div>
+
+<script>
+const STATE = {
+  players: [], market: null, entry: null, incoterm: null,
+  difficulty: 'Junior', currentTurn: 0, year: 2026, gameOver: false,
+  diceRolling: false, totalCells: 20, muted: false, voiceEnabled: true,
+  askedQuestionsPool: {}, askedEventsPool: {}
+};
+
+const PLAYER_COLORS = ['#ffd700', '#4ecdc4', '#ff6b6b', '#a29bfe'];
+const INITIAL_CAPITAL = 50;
+const INITIAL_ESG = 70;
+
+const ENTRY_EFFECTS = {
+  'Exportación Directa': 0, 'Alianza Estratégica': 2,
+  'Licenciamiento / Franquicia': 3, 'Joint Venture': 5,
+  'Inversión Extranjera': 8, 'Filial Propia': 10
+};
+
+const DIFFICULTY_MULT = { 'Junior': 1.0, 'Consultor': 1.25, 'Director Global': 2.0 };
+
+const QUESTIONS_DATABASE = {
+  "Japón": [
+    {
+      "q": "Casilla Regulatoria (MHLW): El Ministerio de Salud (MHLW) exige registro individual por SKU y nombrar un MAH local. ¿Cómo procede ANDINA GLOW?",
+      "opts": [
+        {
+          "t": "Contratar un MAH japonés especializado con auditoría INCI y certificación en origen",
+          "pts": 20,
+          "esg": 15
+        },
+        {
+          "t": "Designar MAH mediante agencia distribuidora con registro básico",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Comercializar por e-commerce transfronterizo delegando gestión al comprador",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Exportar directamente a minoristas en Tokio sin tramitar registro MAH",
+          "pts": -20,
+          "esg": -15
+        }
+      ]
+    },
+    {
+      "q": "Diseño y Empaque (Mottainai): La cultura japonesa rechaza el exceso de plástico por el concepto *mottainai*. ¿Cómo adaptan el envase?",
+      "opts": [
+        {
+          "t": "Rediseñar envase ecológico minimalista e integrar certificación JAS Organic",
+          "pts": 20,
+          "esg": 15
+        },
+        {
+          "t": "Adoptar empaque simplificado sin plástico con etiquetado traducido estándar",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Mantener diseño amazónico original agregando adhesivos informativos",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Embalar en recipientes plásticos recargables sin contar con la certificación oficial JAS",
+          "pts": -20,
+          "esg": -15
+        }
+      ]
+    },
+    {
+      "q": "Atención al Cliente (Omotenashi): El consumidor exige hospitalidad impecable (*omotenashi*). ¿Qué política de servicio implementan?",
+      "opts": [
+        {
+          "t": "Establecer centro de atención nativo con garantía total y logística inversa sin costo",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Tener soporte vía e-mail en japonés con reembolso parcial sujeto a evaluación técnica",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Ofrecer canal de atención en inglés limitando devoluciones a fallas graves",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Eliminar devoluciones internacionales para evitar costos de transporte hacia Colombia",
+          "pts": -20,
+          "esg": -15
+        }
+      ]
+    },
+    {
+      "q": "Segmento Senior: Con más del 30% de la población mayor de 65 años, ¿cómo adaptan la línea antiedad?",
+      "opts": [
+        {
+          "t": "Desarrollar línea antiedad con estudios clínicos locales y tipografía adaptada",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Traducir los beneficios al japonés manteniendo la fórmula base original",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Mantener campaña global dirigida a público joven ignorando al sector senior",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Modificar el etiquetado con letras grandes sin certificación dermatológica local",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Canal de Distribución: Las grandes cadenas de tiendas por departamento (*Isetan, Mitsukoshi*) exigen exclusividad. ¿Cómo entran?",
+      "opts": [
+        {
+          "t": "Alianza con agente comercial nipón especializado en tiendas de lujo",
+          "pts": 20,
+          "esg": 5
+        },
+        {
+          "t": "Participación en feria Cosme Tokyo buscando distribuidores medianos",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Enviar muestras por correo postal a las oficinas de compras de los almacenes",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Vender exclusivamente mediante Amazon Japan sin presencia física en vitrinas",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Pagos Digitales: El 20% de las transacciones usan tiendas de conveniencia (*Konbini*) o *PayPay*. ¿Qué pasarela integran?",
+      "opts": [
+        {
+          "t": "Integración total con Konbini, PayPay, Line Pay y tarjetas JCB locales",
+          "pts": 20,
+          "esg": 5
+        },
+        {
+          "t": "Aceptar tarjetas internacionales de crédito y pasarelas globales estándar",
+          "pts": 10,
+          "esg": 0
+        },
+        {
+          "t": "Configurar transferencias bancarias directas hacia cuentas en Colombia",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Habilitar únicamente pago contra entrega físico en destino",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Cultura del Regalo (Omiyage): El *omiyage* es tradición clave en Japón. ¿Cómo se adaptan comercialmente?",
+      "opts": [
+        {
+          "t": "Diseñar sets de regalo con envoltura ceremonial y ediciones de temporada (*Sakura*)",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Ofrecer cajas decorativas estándar para compras superiores a cierto monto",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Vender únicamente el formato individual sin empaques especiales de regalo",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Ignorar las festividades locales y mantener el empaque convencional de exportación",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Control de Calidad: Un lote defectuoso destruye la reputación en el mercado nipón. ¿Cómo aseguran el estándar?",
+      "opts": [
+        {
+          "t": "Auditoría rigurosa por lote en origen más inspección física en puerto de llegada",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Muestreo aleatorio en fábrica previo al embarque internacional",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Confiar plenamente en el certificado de calidad de la planta en Colombia",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Enviar producto masivo sin inspección adicional esperando que no existan reclamos",
+          "pts": -20,
+          "esg": -15
+        }
+      ]
+    },
+    {
+      "q": "Claims Publicitarios: Las restricciones de afirmaciones médicas en cosméticos son estrictas. ¿Cómo comunican?",
+      "opts": [
+        {
+          "t": "Contratar consultora jurídica japonesa para validar cada reclamo publicitario",
+          "pts": 20,
+          "esg": 5
+        },
+        {
+          "t": "Traducir y adaptar los eslóganes comerciales utilizados en Colombia",
+          "pts": 10,
+          "esg": 0
+        },
+        {
+          "t": "Utilizar afirmaciones directas sobre curación de afecciones cutáneas",
+          "pts": -15,
+          "esg": -10
+        },
+        {
+          "t": "Publicar claims sin respaldo científico ante la ausencia de fiscalización estricta",
+          "pts": -25,
+          "esg": -15
+        }
+      ]
+    },
+    {
+      "q": "Reciclaje de Envases: La Ley de Envases exige separación estricta por materiales. ¿Cómo cumplen?",
+      "opts": [
+        {
+          "t": "Fabricar envases monomaterial con instrucciones claras de reciclaje en kanji",
+          "pts": 20,
+          "esg": 20
+        },
+        {
+          "t": "Añadir etiquetas adhesivas explicando la separación de plásticos y papel",
+          "pts": 10,
+          "esg": 10
+        },
+        {
+          "t": "Usar empaques mixtos sin guías específicas de separación de residuos",
+          "pts": -10,
+          "esg": -10
+        },
+        {
+          "t": "Emplear envases multicapa no reciclables para garantizar mayor durabilidad",
+          "pts": -20,
+          "esg": -20
+        }
+      ]
+    },
+    {
+      "q": "Tendencia Kawaii: El diseño tierno (*kawaii*) tracciona ventas en minoristas juveniles. ¿Qué estrategia siguen?",
+      "opts": [
+        {
+          "t": "Alianza con ilustrador local para edición limitada de personajes kawaii amazónicos",
+          "pts": 20,
+          "esg": 5
+        },
+        {
+          "t": "Incluir gráficos tiernos estilizados en el folleto digital de la marca",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Mantener el diseño sobrio de la startup sin incorporar elementos kawaii",
+          "pts": -5,
+          "esg": 0
+        },
+        {
+          "t": "Rechazar la tendencia por considerarla incompatible con el concepto natural",
+          "pts": -15,
+          "esg": -5
+        }
+      ]
+    },
+    {
+      "q": "Mercado de Okinawa: Okinawa destaca por su cultura *wellness* y longevidad. ¿Cómo entran a la región?",
+      "opts": [
+        {
+          "t": "Crear línea wellness especial inspirada en los ingredientes botánicos locales",
+          "pts": 20,
+          "esg": 15
+        },
+        {
+          "t": "Distribuir la línea general en tiendas naturistas seleccionadas de la isla",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Enviar stock regular sin adaptar el posicionamiento al cliente de Okinawa",
+          "pts": -5,
+          "esg": 0
+        },
+        {
+          "t": "Descartar la región y enfocar todos los recursos exclusivamente en Tokio",
+          "pts": -15,
+          "esg": -5
+        }
+      ]
+    },
+    {
+      "q": "Canal Drugstore: Las cadenas de farmacias (*Matsumoto Kiyoshi*) son de alta rotación. ¿Cómo negocian?",
+      "opts": [
+        {
+          "t": "Acuerdos de visibilidad en anaquel principal con capacitación a consejeros de belleza",
+          "pts": 20,
+          "esg": 5
+        },
+        {
+          "t": "Ingresar mediante distribuidor secundario a menor escala geográfica",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Ofrecer solo venta online restando importancia a la presencia en farmacias",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Exigir ingreso con catálogo completo sin negociar márgenes con la cadena",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Trazabilidad de Ingredientes: El consumidor exige conocer el origen exacto del copoazú. ¿Cómo lo muestran?",
+      "opts": [
+        {
+          "t": "Sistema de trazabilidad blockchain con código QR conectado a comunidades nativas",
+          "pts": 20,
+          "esg": 25
+        },
+        {
+          "t": "Publicar un mapa detallado de abastecimiento en la web corporativa en japonés",
+          "pts": 10,
+          "esg": 15
+        },
+        {
+          "t": "Indicar genéricamente en la etiqueta trasera \"Origen: Selva Amazónica\"",
+          "pts": -5,
+          "esg": -5
+        },
+        {
+          "t": "Omitir detalles de origen geográfico para simplificar el proceso de empaque",
+          "pts": -15,
+          "esg": -15
+        }
+      ]
+    },
+    {
+      "q": "Alianzas Keiretsu: Las redes empresariales (*keiretsu*) controlan grandes canales. ¿Cómo se vinculan?",
+      "opts": [
+        {
+          "t": "Establecer alianza estratégica con distribuidor anclado a un grupo keiretsu sólido",
+          "pts": 20,
+          "esg": 5
+        },
+        {
+          "t": "Negociar de forma independiente con marcas medianas fuera de los conglomerados",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Intentar competir en solitario contra las redes establecidas del mercado",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Ignorar la estructura comercial japonesa y operar sin intermediarios",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Certificación Cosmos vs JAS: ¿Cómo resuelven la convalidación de sellos ecológicos?",
+      "opts": [
+        {
+          "t": "Tramitar equivalencia y doble certificación COSMOS y JAS Organic",
+          "pts": 20,
+          "esg": 20
+        },
+        {
+          "t": "Mostrar el sello COSMOS europeo explicando su equivalencia en folletos",
+          "pts": 10,
+          "esg": 10
+        },
+        {
+          "t": "Usar el sello ecológico colombiano asumiendo que el cliente lo reconocerá",
+          "pts": -10,
+          "esg": -10
+        },
+        {
+          "t": "Vender el producto como ecológico mediante autodeclaración comercial",
+          "pts": -20,
+          "esg": -20
+        }
+      ]
+    },
+    {
+      "q": "Estrategia de Precios Premium: El mercado valora la alta gama si hay calidad comprobada. ¿Cómo fijan precios?",
+      "opts": [
+        {
+          "t": "Posicionamiento de lujo accesible con precio alineado a marcas de alta cosmética nipona",
+          "pts": 20,
+          "esg": 5
+        },
+        {
+          "t": "Precio competitivo medio frente a marcas importadas de Europa",
+          "pts": 10,
+          "esg": 0
+        },
+        {
+          "t": "Precio bajo para capturar volumen rápido en grandes superficies",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Precio extremadamente alto sin justificación diferencial en la fórmula",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Gestión de Inventarios JIT: El sistema *Just in Time* es ley logística en Japón. ¿Cómo operan?",
+      "opts": [
+        {
+          "t": "Mantener stock amortiguador en almacén local conectado al ERP del distribuidor",
+          "pts": 20,
+          "esg": 5
+        },
+        {
+          "t": "Enviar lotes trimestrales basados en proyecciones estándar de ventas",
+          "pts": 10,
+          "esg": 0
+        },
+        {
+          "t": "Enviar mercancía solo cuando el inventario local llegue a cero absoluto",
+          "pts": -15,
+          "esg": -10
+        },
+        {
+          "t": "Desatender los tiempos de reposición generando quiebres frecuentes de stock",
+          "pts": -25,
+          "esg": -15
+        }
+      ]
+    },
+    {
+      "q": "Alianzas con Influencers (KOLs): ¿Cómo estructuran campañas con líderes de opinión en Japón?",
+      "opts": [
+        {
+          "t": "Contratar micro-influencers de belleza limpia con contratos de transparencia FTC",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Enviar muestras gratuitas a creadores de contenido masivo sin acuerdo formal",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Pagar reseñas falsas en blogs de moda sin declarar patrocinio comercial",
+          "pts": -15,
+          "esg": -10
+        },
+        {
+          "t": "Omitir estrategias de KOLs confiando exclusivamente en publicidad impresa",
+          "pts": -20,
+          "esg": -5
+        }
+      ]
+    },
+    {
+      "q": "Protección de Propiedad Intelectual: El registro de marca ante la JPO es indispensable. ¿Qué hacen?",
+      "opts": [
+        {
+          "t": "Registrar marca y logotipo en la Oficina de Patentes de Japón (JPO) antes de entrar",
+          "pts": 20,
+          "esg": 5
+        },
+        {
+          "t": "Registrar únicamente la marca fonética en caracteres katakana",
+          "pts": 10,
+          "esg": 0
+        },
+        {
+          "t": "Exportar sin registro formal de propiedad intelectual en el país destino",
+          "pts": -15,
+          "esg": -5
+        },
+        {
+          "t": "Confiar en el registro de marca obtenido únicamente en la Superintendencia de Colombia",
+          "pts": -25,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Innovación en Texturas: Los geles ligeros dominan sobre las cremas pesadas. ¿Cómo adaptan el producto?",
+      "opts": [
+        {
+          "t": "Reformular la textura a emulsiones acuosas de rápida absorción tipo esencia",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Ofrecer versión ligera alternativa para temporada de verano en Japón",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Mantener las cremas densas originales de manteca de copoazú sin cambios",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Exportar la línea corporal formulada originalmente para clima tropical húmedo",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Sostenibilidad Comunitaria: ¿Cómo comunican el impacto social en Colombia al consumidor japonés?",
+      "opts": [
+        {
+          "t": "Campaña audiovisual subtitulada mostrando el empoderamiento de mujeres recolectoras",
+          "pts": 20,
+          "esg": 25
+        },
+        {
+          "t": "Incluir un folleto impreso en papel reciclado con la historia de las comunidades",
+          "pts": 10,
+          "esg": 15
+        },
+        {
+          "t": "Mencionar de forma genérica el término \"Comercio Justo\" sin datos específicos",
+          "pts": -5,
+          "esg": -5
+        },
+        {
+          "t": "Omitir el componente social enfocándose únicamente en la eficacia cosmética",
+          "pts": -15,
+          "esg": -15
+        }
+      ]
+    },
+    {
+      "q": "Gestión de Crisis por Redes: Un comentario negativo se viraliza rápido. ¿Cómo responden?",
+      "opts": [
+        {
+          "t": "Protocolo de respuesta inmediata bilingüe con auditoría técnica pública del lote",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Emitir un comunicado general en la web corporativa aclarando el malentendido",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Eliminar los comentarios negativos de las cuentas oficiales de la marca",
+          "pts": -15,
+          "esg": -10
+        },
+        {
+          "t": "Ignorar las críticas en redes sociales esperando que pierdan relevancia",
+          "pts": -25,
+          "esg": -15
+        }
+      ]
+    },
+    {
+      "q": "Alianzas con Universidades: ¿Cómo potencian la credibilidad científica de los ingredientes?",
+      "opts": [
+        {
+          "t": "Convenio de investigación botánica conjunta con la Universidad de Tokio",
+          "pts": 20,
+          "esg": 20
+        },
+        {
+          "t": "Citar estudios científicos previos realizados en universidades colombianas",
+          "pts": 10,
+          "esg": 10
+        },
+        {
+          "t": "Argumentar propiedades milagrosas avaladas por la tradición ancestral amazónica",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Inventar pruebas de laboratorio internas sin respaldo académico externo",
+          "pts": -25,
+          "esg": -20
+        }
+      ]
+    }
+  ],
+  "Alemania": [
+    {
+      "q": "Reglamento UE de Alérgenos (2023/1545): La UE actualizó la lista de fragancias alergénicas obligatorias. ¿Cómo adaptan su etiquetado?",
+      "opts": [
+        {
+          "t": "Reformular el producto y actualizar el INCI completo con código QR de trazabilidad",
+          "pts": 20,
+          "esg": 15
+        },
+        {
+          "t": "Modificar la etiqueta física para incorporar estrictamente las nuevas sustancias",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Mantener etiquetado anterior notificando variaciones solo en el portal CPNP",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Comercializar lotes en almacenes alemanes omitiendo la actualización",
+          "pts": -20,
+          "esg": -15
+        }
+      ]
+    },
+    {
+      "q": "Evaluación Öko-Test: La revista Öko-Test evalúa la pureza y ausencia de tóxicos. ¿Cómo abordan esta prueba?",
+      "opts": [
+        {
+          "t": "Enviar muestras a un laboratorio alemán certificado para superar estándares de Öko-Test",
+          "pts": 20,
+          "esg": 15
+        },
+        {
+          "t": "Certificar que los ingredientes activos cumplen con los límites de pureza de la UE",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Confiar en análisis de laboratorio en Colombia sin auditoría local en Alemania",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Ignorar la evaluación de Öko-Test y centrarse en marketing digital masivo",
+          "pts": -20,
+          "esg": -15
+        }
+      ]
+    },
+    {
+      "q": "Ley de Envases (VerpackG): Exige registrar todos los empaques comerciales. ¿Qué acción realizan?",
+      "opts": [
+        {
+          "t": "Registrar la marca en la plataforma central LUCID y contratar un sistema dual de reciclaje",
+          "pts": 20,
+          "esg": 20
+        },
+        {
+          "t": "Utilizar envases compostables certificados compensando las tarifas de gestión",
+          "pts": 10,
+          "esg": 10
+        },
+        {
+          "t": "Enviar mercancía con empaques estándar sin realizar el registro oficial en LUCID",
+          "pts": -10,
+          "esg": -10
+        },
+        {
+          "t": "Externalizar los envíos a un socio comercial sin verificar sus obligaciones de reciclaje",
+          "pts": -20,
+          "esg": -20
+        }
+      ]
+    },
+    {
+      "q": "Certificación COSMOS Organic: El consumidor alemán desconfía de marcas sin sellos ecológicos avalados. ¿Cómo responden?",
+      "opts": [
+        {
+          "t": "Obtener la certificación COSMOS Organic para todo el catálogo antes del lanzamiento",
+          "pts": 20,
+          "esg": 20
+        },
+        {
+          "t": "Certificar al menos el producto principal con el sello ecológico BDIH alemán",
+          "pts": 10,
+          "esg": 10
+        },
+        {
+          "t": "Usar la certificación orgánica colombiana en los empaques de exportación",
+          "pts": -10,
+          "esg": -10
+        },
+        {
+          "t": "Comercializar el producto como natural mediante autodeclaración comercial",
+          "pts": -20,
+          "esg": -20
+        }
+      ]
+    },
+    {
+      "q": "Sello Vegano (V-Label): El sello V-Label es un estándar clave en el retail alemán. ¿Qué hacen al respecto?",
+      "opts": [
+        {
+          "t": "Tramitar la certificación oficial V-Label europea para toda la línea amazónica",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Incluir una declaración de producto libre de crueldad animal avalada por PETA",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Indicar en la contraetiqueta el texto \"Apto para veganos\" sin certificación oficial",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Omitir el distintivo vegano enfocándose exclusivamente en ingredientes naturales",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Huella de Carbono Neutral: Alemania castiga fuertemente las emisiones logísticas elevadas. ¿Cómo compensan la huella?",
+      "opts": [
+        {
+          "t": "Alianza con ClimatePartner para certificar transporte marítimo neutral en carbono",
+          "pts": 20,
+          "esg": 25
+        },
+        {
+          "t": "Financiar un proyecto local de reforestación en la Amazonía colombiana",
+          "pts": 10,
+          "esg": 15
+        },
+        {
+          "t": "Calcular internamente las emisiones corporativas sin adquirir bonos de compensación",
+          "pts": -5,
+          "esg": -5
+        },
+        {
+          "t": "Enviar la mercancía mediante transporte aéreo exprés priorizando la velocidad",
+          "pts": -15,
+          "esg": -20
+        }
+      ]
+    },
+    {
+      "q": "Pruebas Dermatest: El sello Dermatest otorga máxima credibilidad en farmacias (*Reformhaus*). ¿Cómo lo obtienen?",
+      "opts": [
+        {
+          "t": "Contratar a Dermatest para realizar pruebas clínicas de parche con 5 estrellas de calidad",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Presentar resultados de pruebas de tolerancia cutánea en laboratorios europeos",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Adjuntar pruebas de eficacia realizadas en centros de investigación colombianos",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Omitir las pruebas clínicas alemanas respaldándose únicamente en la tradición botánica",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Facturación XRechnung: Las empresas alemanas exigen formatos digitales normalizados. ¿Cómo operan?",
+      "opts": [
+        {
+          "t": "Integrar software compatible con el estándar XRechnung y ZUGFeRD",
+          "pts": 20,
+          "esg": 5
+        },
+        {
+          "t": "Contratar un asesor fiscal europeo que emita las facturas requeridas por ley",
+          "pts": 10,
+          "esg": 0
+        },
+        {
+          "t": "Enviar facturas comerciales tradicionales en formato PDF por correo electrónico",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Utilizar facturas físicas impresas enviadas por correo postal internacional",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Ley LkSG (Cadena de Suministro): Exige auditar las condiciones sociales en la cadena de suministro. ¿Cómo cumplen?",
+      "opts": [
+        {
+          "t": "Auditar a las comunidades recolectoras de copoazú publicando informe de debida diligencia",
+          "pts": 20,
+          "esg": 25
+        },
+        {
+          "t": "Suscribir un código de conducta corporativo firmado por proveedores en Colombia",
+          "pts": 10,
+          "esg": 15
+        },
+        {
+          "t": "Requerir declaraciones juradas de buenas prácticas sin verificar en terreno",
+          "pts": -5,
+          "esg": -5
+        },
+        {
+          "t": "Omitir auditoría delegando la responsabilidad legal en el importador alemán",
+          "pts": -15,
+          "esg": -20
+        }
+      ]
+    },
+    {
+      "q": "Retail de Droguerías (dm / Rossmann): Las grandes cadenas dominan el retail en Alemania. ¿Cómo negocian?",
+      "opts": [
+        {
+          "t": "Introducir inicialmente una línea exclusiva en dm con plan de expansión progresivo",
+          "pts": 20,
+          "esg": 5
+        },
+        {
+          "t": "Negociar un contrato directo con Rossmann para todo el catálogo de la startup",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Intentar ingresar de manera simultánea en ambas cadenas sin un distribuidor de apoyo",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Descartar el retail físico y vender únicamente por Amazon Alemania",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Feria Vivaness (Núremberg): Es clave para el sector cosmético ecológico en Europa. ¿Cómo participan?",
+      "opts": [
+        {
+          "t": "Reservar un stand profesional con agenda pre-organizada de reuniones comerciales",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Asistir como visitantes profesionales para estudiar la competencia y hacer networking",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Enviar folletos corporativos impresos por correo postal a los stands expositores",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Enviar representantes comerciales sin presencia activa ni espacio contratado",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Lectura del INCI: El consumidor alemán lee detalladamente la lista de ingredientes. ¿Cómo facilitan la lectura?",
+      "opts": [
+        {
+          "t": "Incluir nomenclatura INCI completa complementada con código QR de acceso a glosario",
+          "pts": 20,
+          "esg": 15
+        },
+        {
+          "t": "Imprimir la lista INCI completa con tipografía legible en la etiqueta posterior",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Destacar únicamente los ingredientes activos principales omitiendo excipientes",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Mostrar los componentes activos en inglés sin incluir la nomenclatura técnica INCI",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Antigreenwashing: El mercado alemán penaliza severamente las afirmaciones verdes engañosas. ¿Cómo lo previenen?",
+      "opts": [
+        {
+          "t": "Fundamentar cada afirmación publicitaria en auditorías independientes y sellos",
+          "pts": 20,
+          "esg": 20
+        },
+        {
+          "t": "Comunicar exclusivamente datos reales de sostenibilidad respaldados por la planta",
+          "pts": 10,
+          "esg": 10
+        },
+        {
+          "t": "Utilizar conceptos generales de cuidado ambiental sin mediciones de impacto",
+          "pts": -10,
+          "esg": -10
+        },
+        {
+          "t": "Diseñar campañas emocionales con la selva sin relación directa con procesos reales",
+          "pts": -20,
+          "esg": -20
+        }
+      ]
+    },
+    {
+      "q": "Puerto de Hamburgo: ¿Cómo optimizan la entrada marítima al territorio alemán?",
+      "opts": [
+        {
+          "t": "Consolidar carga en contenedores refrigerados directos al puerto de Hamburgo",
+          "pts": 20,
+          "esg": 5
+        },
+        {
+          "t": "Utilizar rutas marítimas con paradas intermedias en puertos del norte de Europa",
+          "pts": 10,
+          "esg": 0
+        },
+        {
+          "t": "Fraccionar la carga en pequeños envíos para reducir costos fijos de puerto",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Utilizar transporte aéreo permanente sin consolidar carga marítima eficiente",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Canal Farmacias (Apotheken): Representan un canal de máxima confianza. ¿Cómo entran?",
+      "opts": [
+        {
+          "t": "Alianza estratégica con distribuidor farmacéutico mayorista y formación a personal",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Presencia en tiendas especializadas en salud natural (*Reformhaus*)",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Ofrecer producto directo a farmacias independientes mediante correo electrónico",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Vender exclusivamente por canales digitales sin considerar farmacias físicas",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Ley HWG (Publicidad Médica): Sanciona afirmaciones de salud no comprobadas. ¿Cómo actúan?",
+      "opts": [
+        {
+          "t": "Someter cada texto publicitario a revisión legal por un especialista alemán",
+          "pts": 20,
+          "esg": 5
+        },
+        {
+          "t": "Utilizar únicamente eslóganes aprobados por las directrices cosméticas de la UE",
+          "pts": 10,
+          "esg": 0
+        },
+        {
+          "t": "Traducir directamente al alemán la publicidad empleada en Latinoamérica",
+          "pts": -15,
+          "esg": -10
+        },
+        {
+          "t": "Prometer curación de problemas dermatológicos graves para aumentar ventas",
+          "pts": -25,
+          "esg": -15
+        }
+      ]
+    },
+    {
+      "q": "Estrategia de Precios: ¿Cómo determinan el valor de venta al público en Alemania?",
+      "opts": [
+        {
+          "t": "Posicionamiento de gama media-alta acorde a estándares de cosmética orgánica europea",
+          "pts": 20,
+          "esg": 5
+        },
+        {
+          "t": "Precio estándar alineado con marcas ecológicas locales de droguería",
+          "pts": 10,
+          "esg": 0
+        },
+        {
+          "t": "Fijar precios bajos para competir con marcas masivas de supermercado",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Establecer tarifas excesivamente altas sin diferenciación técnica comprobada",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Acuerdos SLA Logísticos: Los alemanes exigen cumplimiento estricto de SLA. ¿Cómo responden?",
+      "opts": [
+        {
+          "t": "Establecer contratos con SLAs logísticos punitorios y trazabilidad en tiempo real",
+          "pts": 20,
+          "esg": 5
+        },
+        {
+          "t": "Programar entregas con márgenes de tolerancia acordados con el distribuidor",
+          "pts": 10,
+          "esg": 0
+        },
+        {
+          "t": "Enviar mercancía con fechas aproximadas de entrega sin compromisos formales",
+          "pts": -15,
+          "esg": -10
+        },
+        {
+          "t": "Incumplir plazos de entrega argumentando demoras operativas en origen",
+          "pts": -25,
+          "esg": -15
+        }
+      ]
+    },
+    {
+      "q": "Educación al Consumidor: ¿Cómo educan al cliente alemán sobre los activos amazónicos?",
+      "opts": [
+        {
+          "t": "Publicar white papers y artículos técnicos en revistas especializadas de belleza",
+          "pts": 20,
+          "esg": 15
+        },
+        {
+          "t": "Crear infografías digitales explicando el uso tradicional y sostenible de insumos",
+          "pts": 10,
+          "esg": 10
+        },
+        {
+          "t": "Lanzar campañas publicitarias centradas exclusivamente en el diseño estético",
+          "pts": -5,
+          "esg": -5
+        },
+        {
+          "t": "Omitir contenido educativo manteniendo una estrategia puramente transaccional",
+          "pts": -15,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Registro EUIPO: ¿Qué resguardo legal de propiedad intelectual ejecutan en la Unión Europea?",
+      "opts": [
+        {
+          "t": "Registrar la marca comercial en la Oficina de Propiedad Intelectual de la UE (EUIPO)",
+          "pts": 20,
+          "esg": 5
+        },
+        {
+          "t": "Registrar la marca únicamente en el registro mercantil de Alemania",
+          "pts": 10,
+          "esg": 0
+        },
+        {
+          "t": "Exportar a territorio europeo sin registro de marca formal en la EUIPO",
+          "pts": -15,
+          "esg": -5
+        },
+        {
+          "t": "Proteger la marca solo en Colombia confiando en la protección internacional genérica",
+          "pts": -25,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Texturas Estacionales: Las cremas deben adaptarse al invierno y verano europeo. ¿Qué hacen?",
+      "opts": [
+        {
+          "t": "Desarrollar variantes de textura estacional adaptadas al clima europeo",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Formular emulsiones de absorción equilibrada aptas para todo el año",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Mantener las fórmulas originales diseñadas para clima tropical húmedo",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Comercializar el inventario general sin evaluar adaptabilidad climática",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Comercio Justo: ¿Cómo comunican el valor del comercio justo con comunidades indígenas?",
+      "opts": [
+        {
+          "t": "Presentar documentales institucionales certificados sobre desarrollo en la selva",
+          "pts": 20,
+          "esg": 25
+        },
+        {
+          "t": "Incluir testimonios de líderes comunitarios en la web corporativa en alemán",
+          "pts": 10,
+          "esg": 15
+        },
+        {
+          "t": "Utilizar eslóganes corporativos generales sobre apoyo comunitario sin datos",
+          "pts": -5,
+          "esg": -5
+        },
+        {
+          "t": "Desatender el componente social enfocándose únicamente en propiedades cosméticas",
+          "pts": -15,
+          "esg": -15
+        }
+      ]
+    },
+    {
+      "q": "Norma ISO 22716: La industria cosmética europea exige ISO 22716 de manufactura. ¿Cómo cumplen?",
+      "opts": [
+        {
+          "t": "Certificar la planta de producción en Colombia bajo la norma ISO 22716",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Implementar protocolos de calidad equivalentes auditados por un consultor externo",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Operar con certificaciones de calidad locales de carácter general",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Fabricar sin estándares formales de buenas prácticas de manufactura cosmética",
+          "pts": -25,
+          "esg": -15
+        }
+      ]
+    },
+    {
+      "q": "Ensayos Botánicos: ¿Cómo reafirman la eficacia de los aceites amazónicos ante laboratorios europeos?",
+      "opts": [
+        {
+          "t": "Establecer un protocolo de investigación conjunta con un instituto dermatológico de la UE",
+          "pts": 20,
+          "esg": 20
+        },
+        {
+          "t": "Validar los ensayos botánicos colombianos con expertos independientes europeos",
+          "pts": 10,
+          "esg": 10
+        },
+        {
+          "t": "Promocionar propiedades cosméticas basadas en testimonios de uso tradicional",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Publicar afirmaciones de eficacia sin sustento técnico ni validación científica",
+          "pts": -25,
+          "esg": -20
+        }
+      ]
+    }
+  ],
+  "Emiratos Árabes Unidos": [
+    {
+      "q": "Certificación Halal (ESMA): Exige aval Halal para comercializar cosméticos. ¿Cómo procede ANDINA GLOW?",
+      "opts": [
+        {
+          "t": "Certificar toda la cadena productiva con un organismo internacional acreditado por la ESMA",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Tramitar certificación Halal exclusivamente para materias primas principales",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Utilizar sellos veganos argumentando cumplimiento de preceptos islámicos",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Ingresar productos a Dubái a través de zonas francas omitiendo la ESMA",
+          "pts": -20,
+          "esg": -15
+        }
+      ]
+    },
+    {
+      "q": "Fórmulas Sin Alcohol (Sharía): Los alcoholes están restringidos en cosméticos. ¿Qué acción toman?",
+      "opts": [
+        {
+          "t": "Reformular el producto sustituyendo alcoholes por conservantes naturales permitidos",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Reducir al mínimo los porcentajes alcohólicos en la fase de mezcla de la fórmula",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Mantener fórmula original aclarando presencia de alcohol en la etiqueta en inglés",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Comercializar la línea cosmética estándar sin modificaciones en la composición",
+          "pts": -20,
+          "esg": -15
+        }
+      ]
+    },
+    {
+      "q": "Registro por SKU: Cada producto debe registrarse previamente en la plataforma ESMA. ¿Cómo proceden?",
+      "opts": [
+        {
+          "t": "Contratar a un agente regulatorio local para registrar cada producto en el portal ESMA",
+          "pts": 20,
+          "esg": 5
+        },
+        {
+          "t": "Inscribir únicamente los productos estrella de mayor rotación comercial estimada",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Operar con los registros sanitarios obtenidos en Colombia traducidos al inglés",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Vender la mercancía en el mercado local sin completar el registro oficial en la ESMA",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Zonas Francas (DMCC / JAFZA): Ofrecen incentivos tributarios y operativos. ¿Cómo las utilizan?",
+      "opts": [
+        {
+          "t": "Establecer la sede regional de distribución en la zona franca DMCC de Dubái",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Alquilar un depósito logístico temporal en la zona franca de Jebel Ali",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Operar de manera directa desde fuera de zonas francas asumiendo mayores aranceles",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Instalar oficinas comerciales urbanas costosas sin estructura logística previa",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Empaque Premium de Lujo: El consumidor del Golfo busca estética sofisticada. ¿Cómo adaptan el empaque?",
+      "opts": [
+        {
+          "t": "Diseñar un empaque premium con detalles dorados, acabado de lujo y textos bilingües",
+          "pts": 20,
+          "esg": 5
+        },
+        {
+          "t": "Lanzar una edición especial conmemorativa exclusiva para el mercado de Dubái",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Mantener el empaque estándar de exportación agregando únicamente etiqueta en árabe",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Utilizar empaques plásticos básicos restando valor a la percepción de lujo",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Estabilidad Térmica (50°C): Las temperaturas del verano afectan el stock. ¿Cómo protegen la estabilidad?",
+      "opts": [
+        {
+          "t": "Desarrollar fórmulas termoestables con pruebas de resistencia a altas temperaturas y envases UV",
+          "pts": 20,
+          "esg": 15
+        },
+        {
+          "t": "Incorporar embalaje con protección térmica avanzada durante el transporte local",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Enviar inventario utilizando cadena logística estándar sin refrigeración especializada",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Ignorar condiciones climáticas extremas confiando en la estabilidad del aceite",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Sponsor Emiratí (Local Partner): Se requiere un patrocinador legal fuera de zona franca. ¿Cómo lo manejan?",
+      "opts": [
+        {
+          "t": "Alianza estratégica a largo plazo con un sponsor emiratí de reconocido prestigio",
+          "pts": 20,
+          "esg": 5
+        },
+        {
+          "t": "Suscribir contrato de representación comercial con un socio local mediano",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Operar mediante acuerdos informales sin respaldo de un sponsor legal establecido",
+          "pts": -15,
+          "esg": -10
+        },
+        {
+          "t": "Desatender la normativa local operando al margen de la ley comercial de Emiratos",
+          "pts": -25,
+          "esg": -20
+        }
+      ]
+    },
+    {
+      "q": "Beautyworld Middle East: Es la principal plataforma ferial de la región. ¿Cómo participan?",
+      "opts": [
+        {
+          "t": "Contratar un stand de alto impacto con agenda de reuniones con distribuidores",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Asistir como expositores con un formato modular de menor tamaño",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Enviar catálogos comerciales impresos por correo a los expositores",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Enviar observadores comerciales sin presencia de marca ni espacio asignado",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Dubai Duty Free: Canal clave para viajeros internacionales de alto volumen. ¿Cómo entran?",
+      "opts": [
+        {
+          "t": "Acercamiento estratégico con Dubai Duty Free para posicionar kits de viaje exclusivos",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Colocar productos en tiendas minoristas de tránsito aeroportuario seleccionadas",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Vender exclusivamente en centros comerciales urbanos omitiendo aeropuertos",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Intentar abastecer el Duty Free mediante distribuidores informales sin licencias",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Demografía Expatriada: El 88% de la población son residentes extranjeros. ¿Cómo estructuran la oferta?",
+      "opts": [
+        {
+          "t": "Desarrollar líneas adaptadas tanto a gustos occidentales como a preferencias árabes",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Ofrecer un producto universal con etiquetado bilingüe de alta claridad",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Enfocar el marketing exclusivamente en la población local ignorando expatriados",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Comercializar un único formato estándar dirigido únicamente a turistas",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Pagos Digitales en Dubái: Las pasarelas locales dominan las compras. ¿Qué integran?",
+      "opts": [
+        {
+          "t": "Integración con pasarelas Telr, Network International, Apple Pay y BNPL",
+          "pts": 20,
+          "esg": 5
+        },
+        {
+          "t": "Habilitar tarjetas internacionales de crédito y transferencias bancarias",
+          "pts": 10,
+          "esg": 0
+        },
+        {
+          "t": "Configurar pagos por pasarelas globales sin optimización para moneda local (AED)",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Exigir pago manual por transferencia internacional previa al despacho",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Hub de Reexportación: Dubái distribuye a África y Asia Central. ¿Cómo lo aprovechan?",
+      "opts": [
+        {
+          "t": "Utilizar EAU como plataforma logística para reexportar a países vecinos",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Abastecer mercados secundarios mediante alianzas con distribuidores emiratíes",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Enfocar todas las operaciones comerciales exclusivamente dentro del territorio de EAU",
+          "pts": -5,
+          "esg": 0
+        },
+        {
+          "t": "Desatender el potencial logístico del hub regional operando de forma aislada",
+          "pts": -15,
+          "esg": -5
+        }
+      ]
+    },
+    {
+      "q": "Spas de Hoteles 5 Estrellas: Los hoteles de súper lujo demandan insumos botánicos. ¿Cómo entran?",
+      "opts": [
+        {
+          "t": "Convenios de suministro exclusivo con spas de cadenas de lujo (Burj Al Arab)",
+          "pts": 20,
+          "esg": 15
+        },
+        {
+          "t": "Distribuir en salones de belleza y spas de categoría media en Dubái",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Ofrecer los productos mediante venta directa online sin presencia física",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Intentar comercializar en salones de barrio económicos incompatibles con la marca",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Temporada de Ramadán: Modifica los hábitos de compra y horarios comerciales. ¿Cómo adaptan la estrategia?",
+      "opts": [
+        {
+          "t": "Lanzar edición limitada para Eid al-Fitr con marketing digital nocturno",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Ajustar promociones comerciales y horarios de atención al periodo sagrado",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Mantener la campaña publicitaria anual sin modificaciones durante el ayuno",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Pausar la inversión publicitaria y reducir la actividad durante todo el mes",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Etiquetado en Árabe: La presencia del idioma árabe es obligatoria por ley. ¿Cómo cumplen?",
+      "opts": [
+        {
+          "t": "Contratar un traductor jurado local para certificar la precisión del etiquetado bilingüe oficial",
+          "pts": 20,
+          "esg": 5
+        },
+        {
+          "t": "Utilizar etiquetas bilingües diseñadas con apoyo de agencias de marketing de EAU",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Incluir traducciones automáticas en la etiqueta trasera manteniendo el inglés de principal",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Exportar con etiquetado exclusivamente en español e inglés sin idioma árabe",
+          "pts": -20,
+          "esg": -15
+        }
+      ]
+    },
+    {
+      "q": "Logística de Última Milla: Exige alta velocidad en entregas urbanas. ¿Cómo las gestionan?",
+      "opts": [
+        {
+          "t": "Alianza estratégica con empresas de última milla especializadas en e-commerce de lujo",
+          "pts": 20,
+          "esg": 5
+        },
+        {
+          "t": "Contratar servicios de mensajería internacional con trazabilidad digital",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Utilizar servicios postales estándar con tiempos de entrega prolongados",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Delegar la distribución urbana en transportadores informales sin control",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Fidelización VIP: Los clientes con alto poder adquisitivo exigen exclusividad. ¿Qué diseñan?",
+      "opts": [
+        {
+          "t": "Crear un club VIP exclusivo con experiencias botánicas y entregas preferenciales",
+          "pts": 20,
+          "esg": 5
+        },
+        {
+          "t": "Ofrecer descuentos escalonados por volumen de compra en la plataforma web",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Aplicar políticas de descuento masivo general sin distinción de cliente",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Omitir programas de fidelización enfocándose en transacciones únicas",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Redes Relacionales (Wasta): Influyen fuertemente en las negociaciones locales. ¿Cómo proceden?",
+      "opts": [
+        {
+          "t": "Establecer presencia directiva permanente en Dubái para cultivar redes de alto nivel",
+          "pts": 20,
+          "esg": 5
+        },
+        {
+          "t": "Participar en eventos empresariales y cámaras de comercio bilaterales",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Conducir negociaciones comerciales exclusivamente mediante correos electrónicos",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Ignorar la importancia de las relaciones presenciales confiando en contratos a distancia",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Fragancias Orientales: El público local prefiere aromas cálidos (Oud, Ámbar). ¿Cómo adaptan el producto?",
+      "opts": [
+        {
+          "t": "Desarrollar una línea de aceites con notas cálidas de ámbar y madera de oud",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Aumentar la concentración de fragancias florales exóticas en la fórmula base",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Mantener las fragancias tropicales originales basadas en frutos amazónicos",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Comercializar la línea sin aroma distintivo ignorando preferencias olfativas",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Calendario Islámico: Las campañas deben coordinarse con eventos lunares. ¿Cómo planifican?",
+      "opts": [
+        {
+          "t": "Sincronizar lanzamientos con el inicio del año hégira y festividades clave",
+          "pts": 20,
+          "esg": 5
+        },
+        {
+          "t": "Planificar campañas comerciales basadas en periodos vacacionales de residentes",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Mantener un calendario alineado exclusivamente con el ciclo occidental",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Lanzar productos en momentos de baja actividad sin planificación estacional",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Registro Marcatario MoEI: ¿Cómo blindan la marca contra falsificaciones en la región del Golfo?",
+      "opts": [
+        {
+          "t": "Registrar la marca comercial ante el Ministerio de Economía de EAU",
+          "pts": 20,
+          "esg": 5
+        },
+        {
+          "t": "Registrar el logotipo y nombre comercial en la cámara de comercio de Dubái",
+          "pts": 10,
+          "esg": 0
+        },
+        {
+          "t": "Operar en el mercado emiratí sin registro oficial de marcas locales",
+          "pts": -15,
+          "esg": -5
+        },
+        {
+          "t": "Confiar únicamente en el registro de marca obtenido en Colombia",
+          "pts": -25,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Narrativa de Lujo Sostenible: ¿Cómo comunican el origen ecológico a clientes de alto poder adquisitivo?",
+      "opts": [
+        {
+          "t": "Campañas enfocadas en la preservación amazónica como símbolo de lujo ético",
+          "pts": 20,
+          "esg": 20
+        },
+        {
+          "t": "Presentar folletería de alta calidad destacando la pureza de los activos botánicos",
+          "pts": 10,
+          "esg": 10
+        },
+        {
+          "t": "Utilizar mensajes ecológicos generales sin relación con las comunidades",
+          "pts": -5,
+          "esg": -5
+        },
+        {
+          "t": "Omitir la narrativa ambiental enfocándose solo en la estética del envase",
+          "pts": -15,
+          "esg": -15
+        }
+      ]
+    },
+    {
+      "q": "Gestión B2B de Almacenes: ¿Cómo manejan la relación con grandes conglomerados de retail en EAU?",
+      "opts": [
+        {
+          "t": "Asignar un gestor de cuentas dedicado con disponibilidad presencial en Dubái",
+          "pts": 20,
+          "esg": 5
+        },
+        {
+          "t": "Atender los requerimientos de grandes almacenes mediante soporte remoto",
+          "pts": 10,
+          "esg": 0
+        },
+        {
+          "t": "Responder a las solicitudes de los compradores minoristas con demoras",
+          "pts": -15,
+          "esg": -10
+        },
+        {
+          "t": "Desatender exigencias contractuales de los retailers generando fricción",
+          "pts": -25,
+          "esg": -15
+        }
+      ]
+    },
+    {
+      "q": "Cámaras Bilaterales: ¿Cómo potencian la credibilidad institucional de ANDINA GLOW en Emiratos?",
+      "opts": [
+        {
+          "t": "Afiliarse activamente a la Cámara de Comercio Colombo-Emiratí en misiones comerciales",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Establecer contacto ocasional con agregados comerciales para resolver dudas",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Operar de forma independiente sin vinculación con gremios ni cámaras",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Desconocer el apoyo institucional disponible arriesgando la inserción",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    }
+  ],
+  "Estados Unidos": [
+    {
+      "q": "Aprovechamiento del TLC (2012): Elimina aranceles para cosméticos colombianos. ¿Cómo lo aprovechan?",
+      "opts": [
+        {
+          "t": "Tramitar rigurosamente el certificado de origen ante la DIAN para arancel 0% en EE.UU",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Utilizar acuerdo comercial únicamente para productos de mayor volumen exportado",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Exportar sin adjuntar certificado de origen asumiendo pago de aranceles generales",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Ignorar beneficios del TLC operando a través de intermediarios en terceros países",
+          "pts": -20,
+          "esg": -15
+        }
+      ]
+    },
+    {
+      "q": "Regulación MoCRA de la FDA: La ley de modernización cosmética exige registro obligatorio. ¿Qué acciones toman?",
+      "opts": [
+        {
+          "t": "Registrarlas instalaciones en la FDA y reportar formalmente la lista de ingredientes por SKU",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Inscribir los productos en el portal MoCRA con asesoría de un consultor en EE.UU",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Vender a través de e-commerce sin completar el registro sanitario exigido por la FDA",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Comercializar la línea cosmética omitiendo las directrices oficiales de la FDA",
+          "pts": -20,
+          "esg": -15
+        }
+      ]
+    },
+    {
+      "q": "Prevención Trabajo Forzoso (UFLPA): Exige cadenas de suministro libres de abusos laborales. ¿Cómo garantizan cumplimiento?",
+      "opts": [
+        {
+          "t": "Auditar la cadena agrícola amazónica con certificación de terceros libre de trabajo forzoso",
+          "pts": 20,
+          "esg": 25
+        },
+        {
+          "t": "Firmar códigos de conducta estrictos con cada uno de los proveedores en Colombia",
+          "pts": 10,
+          "esg": 15
+        },
+        {
+          "t": "Presentar declaraciones juradas internas sin verificación de auditores independientes",
+          "pts": -10,
+          "esg": -10
+        },
+        {
+          "t": "No documentar la trazabilidad de los proveedores arriesgando bloqueo en aduana",
+          "pts": -20,
+          "esg": -20
+        }
+      ]
+    },
+    {
+      "q": "Omnicanalidad (Amazon FBA / Sephora): ¿Cuál es la estrategia de distribución multicanal en EE.UU.?",
+      "opts": [
+        {
+          "t": "Combinar presencia premium en Sephora/Ulta con logística en Amazon FBA",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Distribuir el catálogo mediante distribuidores autorizados en la costa este",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Vender exclusivamente por tienda online propia sin soporte logístico local",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Intentar abastecer grandes superficies sin capacidad logística adecuada",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Clean at Sephora: Las grandes cadenas exigen formulaciones limpias. ¿Qué hacen?",
+      "opts": [
+        {
+          "t": "Obtener el sello \"Clean at Sephora\" excluyendo parabenos, sulfatos y ftalatos",
+          "pts": 20,
+          "esg": 15
+        },
+        {
+          "t": "Adaptar la formulación para cumplir con las listas de ingredientes prohibidos",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Mantener la fórmula original colombiana etiquetándola como natural",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Comercializar sin adaptar la formulación a las exigencias de belleza limpia",
+          "pts": -20,
+          "esg": -15
+        }
+      ]
+    },
+    {
+      "q": "Origen Preferencial TLC: Exige trazabilidad 100% nacional de insumos. ¿Cómo lo gestionan?",
+      "opts": [
+        {
+          "t": "Certificar ante la Cámara de Comercio y DIAN la cadena de valor completa de los insumos",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Solicitar la validación de origen para cada lote despachado hacia EE.UU",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Utilizar declaraciones juradas informales sin aval de entidades oficiales",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Despachar mercancía sin el certificado arriesgando el rechazo aduanero",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Colorantes Aprobados FDA: La FDA prohíbe ciertos colorantes usados en Latinoamérica. ¿Cómo adaptan el producto?",
+      "opts": [
+        {
+          "t": "Reformular la línea cosmética usando solo colorantes aprobados por la FDA",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Certificar los lotes de colorantes mediante pruebas en laboratorios autorizados",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Mantener los colorantes originales empleados en la planta en Colombia",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Exportar fórmulas con colorantes prohibidos arriesgando la retención de la carga",
+          "pts": -20,
+          "esg": -15
+        }
+      ]
+    },
+    {
+      "q": "Retailer Masivo (Target / Walmart): Exigen condiciones comerciales complejas. ¿Cómo entran?",
+      "opts": [
+        {
+          "t": "Ingresar por canales especializados (Sephora) escalando hacia grandes superficies",
+          "pts": 20,
+          "esg": 5
+        },
+        {
+          "t": "Aceptar contratos de prueba con volúmenes controlados en tiendas del sur",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Aceptar condiciones de margen extremadamente desfavorables impuestas",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Intentar negociar con todas las cadenas masivas sin capacidad de stock",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Directrices FTC: La Comisión Federal de Comercio sanciona afirmaciones exageradas. ¿Cómo actúan?",
+      "opts": [
+        {
+          "t": "Someter cada campaña y claim publicitario a revisión legal por un abogado en EE.UU",
+          "pts": 20,
+          "esg": 5
+        },
+        {
+          "t": "Utilizar exclusivamente afirmaciones respaldadas por pruebas dermatológicas de la UE",
+          "pts": 10,
+          "esg": 0
+        },
+        {
+          "t": "Traducir al inglés la publicidad latinoamericana sin verificar directrices FTC",
+          "pts": -15,
+          "esg": -10
+        },
+        {
+          "t": "Publicar claims médicos exagerados sobre rejuvenecimiento sin pruebas",
+          "pts": -25,
+          "esg": -15
+        }
+      ]
+    },
+    {
+      "q": "Proposición 65 de California: Exige advertencias específicas sobre sustancias químicas. ¿Cómo responden?",
+      "opts": [
+        {
+          "t": "Certificar que envases e ingredientes cumplen a cabalidad con la Proposición 65",
+          "pts": 20,
+          "esg": 15
+        },
+        {
+          "t": "Incluir las advertencias de seguridad requeridas por la legislación de California",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Utilizar empaques estándar sin verificar restricciones del estado californiano",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Ignorar la regulación ambiental estatal distribuyendo el producto sin advertencias",
+          "pts": -20,
+          "esg": -15
+        }
+      ]
+    },
+    {
+      "q": "Trazabilidad Ambiental: ¿Cómo demuestran la ausencia de prácticas cuestionadas en la selva amazónica?",
+      "opts": [
+        {
+          "t": "Auditorías independientes publicadas y certificación de comercio justo por proveedor",
+          "pts": 20,
+          "esg": 25
+        },
+        {
+          "t": "Suscribir códigos de buenas prácticas con los recolectores de copoazú y açaí",
+          "pts": 10,
+          "esg": 15
+        },
+        {
+          "t": "Presentar cartas de compromiso firmadas internamente por la gerencia",
+          "pts": -5,
+          "esg": -5
+        },
+        {
+          "t": "Omitir documentación sobre la cadena de suministro exponiendo la marca",
+          "pts": -15,
+          "esg": -20
+        }
+      ]
+    },
+    {
+      "q": "Ruta Marítima Cartagena-Miami: ¿Cómo estructuran el envío marítimo eficiente hacia EE.UU.?",
+      "opts": [
+        {
+          "t": "Consolidar contenedores refrigerados directos desde Cartagena hasta Miami",
+          "pts": 20,
+          "esg": 5
+        },
+        {
+          "t": "Utilizar rutas logísticas con transbordo en puertos de Centroamérica",
+          "pts": 10,
+          "esg": 0
+        },
+        {
+          "t": "Fraccionar la carga en pequeños despachos aéreos incrementando costos",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Operar sin planificación logística enviando mercancía de forma desordenada",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Posicionamiento vs Burt's Bees: Marcas consolidadas dominan el segmento natural en EE.UU. ¿Cómo compiten?",
+      "opts": [
+        {
+          "t": "Destacar los beneficios botánicos de activos amazónicos respaldados por el TLC",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Tramitar la certificación USDA Organic para competir en la categoría natural",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Iniciar una guerra de precios bajos contra marcas locales consolidadas",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Imitar la estrategia publicitaria de competidores líderes sin propuesta propia",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Documentación Aduanera CBP: ¿Cómo evitan retenciones aduaneras en puertos de entrada norteamericanos?",
+      "opts": [
+        {
+          "t": "Contratar un agente de aduanas con licencia federal en EE.UU. para validar trámites",
+          "pts": 20,
+          "esg": 5
+        },
+        {
+          "t": "Utilizar facturas comerciales estandarizadas con descripción detallada y valor FOB",
+          "pts": 10,
+          "esg": 0
+        },
+        {
+          "t": "Declarar valores comerciales estimados sin el nivel de detalle exigido",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Enviar embarques con documentación incompleta o errónea en la factura",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Sello USDA Organic: El sello orgánico estadounidense es altamente valorado. ¿Qué hacen al respecto?",
+      "opts": [
+        {
+          "t": "Certificar la línea principal de productos bajo la norma USDA Organic",
+          "pts": 20,
+          "esg": 20
+        },
+        {
+          "t": "Certificar el producto estrella para posicionarlo en tiendas naturistas",
+          "pts": 10,
+          "esg": 10
+        },
+        {
+          "t": "Utilizar sellos ecológicos colombianos explicando su equivalencia",
+          "pts": -10,
+          "esg": -10
+        },
+        {
+          "t": "Vender el producto como orgánico mediante autodeclaración comercial",
+          "pts": -20,
+          "esg": -20
+        }
+      ]
+    },
+    {
+      "q": "Compras Federales GSA: El TLC abre proveeduría para agencias federales (GSA). ¿Cómo participan?",
+      "opts": [
+        {
+          "t": "Registrar a ANDINA GLOW como proveedor federal certificado ante la GSA",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Ofrecer catálogos especiales con descuentos para contratos públicos",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Enfocar todos los esfuerzos comerciales exclusivamente en el sector privado",
+          "pts": -5,
+          "esg": 0
+        },
+        {
+          "t": "Desatender el canal gubernamental operando sin registros estatales",
+          "pts": -15,
+          "esg": -5
+        }
+      ]
+    },
+    {
+      "q": "Transparencia en Patrocinios: Las normas FTC exigen claridad en patrocinios en redes. ¿Cómo operan?",
+      "opts": [
+        {
+          "t": "Suscribir contratos que obliguen a incluir la etiqueta #Ad / #Sponsored",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Enviar muestras gratuitas a influencers solicitando reseñas honestas",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Pagar menciones comerciales en perfiles omitiendo divulgar patrocinio",
+          "pts": -15,
+          "esg": -10
+        },
+        {
+          "t": "Omitir campañas con influencers confiando solo en pauta tradicional",
+          "pts": -20,
+          "esg": -5
+        }
+      ]
+    },
+    {
+      "q": "Rechazo Aduanero por Origen: La aduana retuvo un embarque por certificado de origen vencido. ¿Cómo responden?",
+      "opts": [
+        {
+          "t": "Renovar de inmediato ante la DIAN, subsanar con el agente aduanal y reexportar",
+          "pts": 20,
+          "esg": 5
+        },
+        {
+          "t": "Reorientar el lote retenido hacia otro mercado internacional secundario",
+          "pts": 10,
+          "esg": 0
+        },
+        {
+          "t": "Pagar el arancel completo en aduana renunciando al beneficio preferencial",
+          "pts": -15,
+          "esg": -10
+        },
+        {
+          "t": "Abandonar la mercancía en el puerto aduanero asumiendo la pérdida total",
+          "pts": -25,
+          "esg": -15
+        }
+      ]
+    },
+    {
+      "q": "Códigos QR de Transparencia: El consumidor estadounidense exige conocer cada detalle del producto. ¿Qué implementan?",
+      "opts": [
+        {
+          "t": "Integrar códigos QR en el envase con acceso a informes de laboratorio y origen",
+          "pts": 20,
+          "esg": 15
+        },
+        {
+          "t": "Habilitar una sección detallada de ingredientes en la web corporativa en inglés",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Listar únicamente los componentes principales en la etiqueta posterior",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Ocultar información de formulación para proteger el secreto industrial",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Monitoreo Bilateral: ¿Qué otra herramienta comercial estudian para mitigar riesgos en EE.UU.?",
+      "opts": [
+        {
+          "t": "Monitorear acuerdos bilaterales de inversión y tratados de cooperación técnica",
+          "pts": 20,
+          "esg": 5
+        },
+        {
+          "t": "Analizar marcos de cooperación comercial regional en el continente",
+          "pts": 10,
+          "esg": 0
+        },
+        {
+          "t": "Operar exclusivamente bajo el marco del TLC sin evaluar el entorno geopolítico",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Desatender la evolución de los acuerdos comerciales internacionales vigentes",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Envases Reciclables (Zero Waste): El mercado exige cero residuos plásticos. ¿Cómo responden?",
+      "opts": [
+        {
+          "t": "Diseñar envases fabricados en aluminio reciclable y vidrio ámbar post-consumo",
+          "pts": 20,
+          "esg": 20
+        },
+        {
+          "t": "Utilizar envases plásticos biodegradables certificados en EE.UU",
+          "pts": 10,
+          "esg": 10
+        },
+        {
+          "t": "Emplear envases plásticos tradicionales de un solo uso sin reciclaje",
+          "pts": -10,
+          "esg": -10
+        },
+        {
+          "t": "Desatender demandas de sostenibilidad priorizando el ahorro en costos",
+          "pts": -20,
+          "esg": -20
+        }
+      ]
+    },
+    {
+      "q": "Marketing Audiovisual Educativo: ¿Cómo comunican el valor de la biodiversidad en el mercado norteamericano?",
+      "opts": [
+        {
+          "t": "Publicar cápsulas audiovisuales educativas sobre la selva amazónica y sus beneficios",
+          "pts": 20,
+          "esg": 15
+        },
+        {
+          "t": "Mantener un blog corporativo con artículos sobre cuidado natural de la piel",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Publicar únicamente imágenes comerciales de los frascos sin contexto",
+          "pts": -5,
+          "esg": -5
+        },
+        {
+          "t": "Prescindir de estrategias de contenido educativo manteniendo anuncios de venta",
+          "pts": -15,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Garantías de Devolución E-commerce: Las políticas de devolución en EE.UU. son muy flexibles. ¿Cómo las estructuran?",
+      "opts": [
+        {
+          "t": "Ofrecer garantía de satisfacción de 30 días con centros de recepción en Miami",
+          "pts": 20,
+          "esg": 5
+        },
+        {
+          "t": "Permitir devoluciones internacionales a cargo del cliente con reembolso parcial",
+          "pts": 10,
+          "esg": 0
+        },
+        {
+          "t": "Rechazar cualquier solicitud de devolución de productos despachados",
+          "pts": -15,
+          "esg": -10
+        },
+        {
+          "t": "Carecer de política formal de devoluciones generando desconfianza online",
+          "pts": -25,
+          "esg": -15
+        }
+      ]
+    },
+    {
+      "q": "Alianzas 1% for the Planet: ¿Cómo fortalecen el compromiso ecológico de la marca en EE.UU.?",
+      "opts": [
+        {
+          "t": "Donar un porcentaje de ventas a organizaciones aliadas (1% for the Planet)",
+          "pts": 20,
+          "esg": 25
+        },
+        {
+          "t": "Patrocinar eventos de concientización ambiental en Nueva York y Los Ángeles",
+          "pts": 10,
+          "esg": 15
+        },
+        {
+          "t": "Mencionar compromisos ambientales genéricos en comunicados de prensa",
+          "pts": -5,
+          "esg": -5
+        },
+        {
+          "t": "Omitir acciones filantrópicas o de responsabilidad social en el mercado",
+          "pts": -15,
+          "esg": -15
+        }
+      ]
+    }
+  ],
+  "China": [
+    {
+      "q": "Registro Sanitario NMPA: Exige expedientes técnicos complejos. ¿Cómo tramitan el ingreso de cosméticos a China?",
+      "opts": [
+        {
+          "t": "Contratar consultora regulatoria en Pekín para dossier técnico completo sin test animal",
+          "pts": 20,
+          "esg": 20
+        },
+        {
+          "t": "Homologar registros mediante distribuidor local autorizado por NMPA",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Vender exclusivamente por comercio electrónico transfronterizo sin registrar fórmula",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Exportar mercancía por canales informales (Daigou) eludiendo aduanas chinas",
+          "pts": -20,
+          "esg": -20
+        }
+      ]
+    },
+    {
+      "q": "Certificación GMP de Origen: Para evitar testeo animal se exige certificado GMP en origen. ¿Qué hacen?",
+      "opts": [
+        {
+          "t": "Obtener el certificado GMP de origen en Colombia demostrando seguridad botánica sin pruebas en animales",
+          "pts": 20,
+          "esg": 25
+        },
+        {
+          "t": "Tramitar la exención mediante laboratorios acreditados en la zona franca de Shanghái",
+          "pts": 10,
+          "esg": 10
+        },
+        {
+          "t": "Permitir pruebas cosméticas en animales en laboratorios fronterizos para agilizar",
+          "pts": -15,
+          "esg": -20
+        },
+        {
+          "t": "Incumplir las normativas de bienestar animal arriesgando el veto definitivo de la marca",
+          "pts": -25,
+          "esg": -30
+        }
+      ]
+    },
+    {
+      "q": "Super-apps (WeChat / Douyin): Dominan las decisiones de compra en China. ¿Cómo estructuran el marketing?",
+      "opts": [
+        {
+          "t": "Desarrollar mini-programas en WeChat y live-streaming en Douyin con KOLs de belleza limpia",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Abrir una tienda corporativa en Tmall Global gestionada por un socio operador local",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Traducir la página web occidental al mandarín sin presencia en las súper-apps",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Ignorar el ecosistema digital chino operando solo por distribuidores físicos",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Protección de Marca (CNIPA): Las marcas extranjeras sufren apropiación de nombres en China. ¿Cómo actúan?",
+      "opts": [
+        {
+          "t": "Registrar anticipadamente la marca fonética en caracteres chinos y su logotipo ante la CNIPA",
+          "pts": 20,
+          "esg": 5
+        },
+        {
+          "t": "Registrar el nombre comercial únicamente en la zona franca de entrada",
+          "pts": 10,
+          "esg": 0
+        },
+        {
+          "t": "Exportar a China sin haber registrado formalmente la propiedad intelectual",
+          "pts": -15,
+          "esg": -5
+        },
+        {
+          "t": "Confiar en el registro de marca obtenido en Colombia asumiendo protección global",
+          "pts": -25,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Modelo E-commerce CBEC: ¿Cómo operan el despacho a consumidores chinos por E-commerce Transfronterizo?",
+      "opts": [
+        {
+          "t": "Utilizar el régimen CBEC almacenando stock en depósitos fiscales dentro de zonas francas",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Realizar envíos directos internacionales por paquete postal express desde Colombia",
+          "pts": 10,
+          "esg": 0
+        },
+        {
+          "t": "Despachar lotes masivos sin control local generando demoras en aduanas",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Operar sin infraestructura logística digitalizada arriesgando pérdida de paquetes",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Clean C-Beauty: Los consumidores jóvenes exigen ingredientes puros. ¿Cómo se posicionan?",
+      "opts": [
+        {
+          "t": "Campaña educativa destacando origen sostenible de aceites amazónicos sin tóxicos",
+          "pts": 20,
+          "esg": 15
+        },
+        {
+          "t": "Promocionar los productos como cosmética natural importada de alta gama",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Utilizar eslóganes comerciales masivos genéricos sin destacar beneficios botánicos",
+          "pts": -5,
+          "esg": -5
+        },
+        {
+          "t": "Comercializar la línea como productos químicos de eficacia rápida sin base natural",
+          "pts": -15,
+          "esg": -15
+        }
+      ]
+    },
+    {
+      "q": "Estrategia con KOLs: El marketing de influencia exige máxima credibilidad. ¿Cómo negocian?",
+      "opts": [
+        {
+          "t": "Seleccionar KOLs en sostenibilidad ambiental con contratos verificados de audiencia",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Contratar agencias de representación de influencers en Pekín para campañas de temporada",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Enviar muestras gratuitas a creadores de contenido sin formalizar acuerdos",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Pagar reseñas falsas masivas en redes sociales chinas sin supervisar contenido",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Límites de Embalaje: El gobierno regula el exceso de capas en cajas de regalo. ¿Qué hacen?",
+      "opts": [
+        {
+          "t": "Diseñar empaques ligeros modulares que cumplan la Ley de Límites de Embalaje",
+          "pts": 20,
+          "esg": 20
+        },
+        {
+          "t": "Reducir el grosor de las cajas protectoras secundarias en e-commerce",
+          "pts": 10,
+          "esg": 10
+        },
+        {
+          "t": "Mantener empaques múltiples ostentosos tradicionales ignorando multas",
+          "pts": -10,
+          "esg": -10
+        },
+        {
+          "t": "Utilizar cajas de lujo sobrecargadas de plástico prohibidas por la ley",
+          "pts": -20,
+          "esg": -20
+        }
+      ]
+    },
+    {
+      "q": "Pasarelas Chinas (Alipay / WeChat Pay): Las tarjetas internacionales no se usan. ¿Qué integran?",
+      "opts": [
+        {
+          "t": "Integración total con Alipay, WeChat Pay y UnionPay mediante pasarela certificada",
+          "pts": 20,
+          "esg": 5
+        },
+        {
+          "t": "Habilitar pagos mediante pasarelas globales compatibles con el mercado chino",
+          "pts": 10,
+          "esg": 0
+        },
+        {
+          "t": "Configurar pagos por transferencia bancaria internacional hacia Colombia",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Exigir pagos manuales en efectivo a través de corresponsales tradicionales",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Festival del 11.11 (Doble 11): Genera el mayor volumen de ventas anual. ¿Cómo se preparan?",
+      "opts": [
+        {
+          "t": "Planificar inventarios con anticipación trimestral y ofertas exclusivas en preventa",
+          "pts": 20,
+          "esg": 5
+        },
+        {
+          "t": "Lanzar promociones de descuento estándar durante la semana del evento",
+          "pts": 10,
+          "esg": 0
+        },
+        {
+          "t": "Llegar al evento con stock limitado sin campañas publicitarias previas",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Ignorar las festividades de consumo masivo operando con normalidad",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Estudios Clínicos NMPA: Las autoridades exigen pruebas registradas ante la NMPA. ¿Qué ejecutan?",
+      "opts": [
+        {
+          "t": "Presentar estudios dermatológicos avalados por institutos médicos aceptados por NMPA",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Traducir los ensayos clínicos realizados en laboratorios de Colombia",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Utilizar afirmaciones comerciales basadas en la tradición botánica sin pruebas",
+          "pts": -15,
+          "esg": -10
+        },
+        {
+          "t": "Publicar claims exagerados sin sustento científico técnico ante la NMPA",
+          "pts": -25,
+          "esg": -15
+        }
+      ]
+    },
+    {
+      "q": "Ingreso Portuario (Shanghái / Cantón): ¿Cómo estructuran la entrada física de contenedores?",
+      "opts": [
+        {
+          "t": "Consolidar carga refrigerada hacia Shanghái o Ningbo con agente aduanal certificado",
+          "pts": 20,
+          "esg": 5
+        },
+        {
+          "t": "Utilizar puertos secundarios de menor congestión para optimizar costos",
+          "pts": 10,
+          "esg": 0
+        },
+        {
+          "t": "Despachar contenedores sin coordinar previamente con operadores portuarios",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Operar mediante envíos fragmentados desordenados propensos a retenciones",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Narrativa Cultural: ¿Cómo conectan el origen amazónico con la sensibilidad del consumidor chino?",
+      "opts": [
+        {
+          "t": "Exaltar la armonía entre medicina botánica ancestral y respeto por la naturaleza",
+          "pts": 20,
+          "esg": 15
+        },
+        {
+          "t": "Publicar infografías digitales detallando beneficios nutritivos de los aceites",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Utilizar mensajes comerciales genéricos centrados solo en descuentos",
+          "pts": -5,
+          "esg": -5
+        },
+        {
+          "t": "Omitir la historia cultural amazónica enfocándose en estética industrial",
+          "pts": -15,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Anticontrafacción Blockchain: El mercado chino enfrenta riesgos de imitación. ¿Qué aplican?",
+      "opts": [
+        {
+          "t": "Integrar etiquetas con códigos criptográficos y trazabilidad blockchain en WeChat",
+          "pts": 20,
+          "esg": 20
+        },
+        {
+          "t": "Incluir hologramas de seguridad físicos en la contraetiqueta del envase",
+          "pts": 10,
+          "esg": 10
+        },
+        {
+          "t": "Comercializar sin sistemas de protección contra falsificaciones",
+          "pts": -10,
+          "esg": -10
+        },
+        {
+          "t": "Ignorar el riesgo de piratería comercial desatendiendo la seguridad",
+          "pts": -20,
+          "esg": -20
+        }
+      ]
+    },
+    {
+      "q": "Operadores Tmall Partner (TP): ¿Cómo operan la gestión integral de tiendas online?",
+      "opts": [
+        {
+          "t": "Contratar un socio operador certificado (TP) en Hangzhou para logística y marketing",
+          "pts": 20,
+          "esg": 5
+        },
+        {
+          "t": "Colaborar con un distribuidor regional mediano con cobertura parcial digital",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Gestionar tiendas online desde Colombia mediante personal remoto sin mandarín",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Desatender la gestión digital operando sin soporte operativo en China",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Precios en Tmall Global: ¿Cómo fijan las tarifas al consumidor final en plataformas chinas?",
+      "opts": [
+        {
+          "t": "Posicionamiento de gama media-alta aprovechando el atractivo del origen exótico",
+          "pts": 20,
+          "esg": 5
+        },
+        {
+          "t": "Precio estándar alineado con marcas importadas de categoría natural",
+          "pts": 10,
+          "esg": 0
+        },
+        {
+          "t": "Fijar precios excesivamente bajos comparables con marcas locales básicas",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Establecer precios de lujo extremo sin diferenciación técnica que lo justifique",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Retenciones NMPA: Una inspección aduanera detiene un lote por discrepancias. ¿Cómo actúan?",
+      "opts": [
+        {
+          "t": "Activar respuesta técnica inmediata con peritos locales para aclarar la fórmula",
+          "pts": 20,
+          "esg": 5
+        },
+        {
+          "t": "Enviar documentación complementaria solicitada por la aduana por correo",
+          "pts": 10,
+          "esg": 0
+        },
+        {
+          "t": "Esperar la resolución pasiva de la aduana china sin intervención local",
+          "pts": -15,
+          "esg": -10
+        },
+        {
+          "t": "Abandonar la carga retenida asumiendo la pérdida financiera del lote",
+          "pts": -25,
+          "esg": -15
+        }
+      ]
+    },
+    {
+      "q": "Ley PIPL (Privacidad de Datos): Las plataformas chinas exigen cumplimiento con la ley PIPL. ¿Qué hacen?",
+      "opts": [
+        {
+          "t": "Implementar servidores locales y protocolos de cumplimiento con la ley PIPL",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Almacenar datos mediante el proveedor de la plataforma contratada",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Recopilar datos de usuarios sin encriptación adaptada a la normativa china",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Infringir las leyes de privacidad locales recopilando datos sin autorización",
+          "pts": -20,
+          "esg": -15
+        }
+      ]
+    },
+    {
+      "q": "Alianza Medicina Tradicional (MTC): ¿Cómo reafirman la compatibilidad botánica ante expertos asiáticos?",
+      "opts": [
+        {
+          "t": "Estudio de compatibilidad botánica con la Universidad de Medicina Tradicional de Pekín",
+          "pts": 20,
+          "esg": 20
+        },
+        {
+          "t": "Citar investigaciones comparativas entre ingredientes amazónicos y asiáticos",
+          "pts": 10,
+          "esg": 10
+        },
+        {
+          "t": "Promocionar los aceites basándose solo en la tradición ancestral",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Publicar propiedades milagrosas no verificadas científicamente",
+          "pts": -25,
+          "esg": -20
+        }
+      ]
+    },
+    {
+      "q": "Marketing de Muestreo (Kits): Los consumidores chinos prueban antes de comprar mediante muestras. ¿Cómo operan?",
+      "opts": [
+        {
+          "t": "Distribuir sobres de muestra en cajas de suscripción de belleza en Shanghái",
+          "pts": 20,
+          "esg": 5
+        },
+        {
+          "t": "Incluir muestras pequeñas gratuitas en las compras iniciales en Tmall",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Vender exclusivamente formato regular sin ofrecer opciones de prueba",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Omitir estrategias de muestreo limitando ventas a presentaciones grandes",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Formulaciones por Clima: El norte seco contrasta con el sur húmedo en China. ¿Cómo resuelven la fórmula?",
+      "opts": [
+        {
+          "t": "Ofrecer dos líneas (emulsión ligera para el sur, crema nutritiva para el norte)",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Desarrollar una fórmula equilibrada intermedia apta para la mayor parte del país",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Exportar la formulación original tropical sin evaluar estacionalidad",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Comercializar un producto único inadecuado para los inviernos del norte",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Expo CIIE Shanghái: La feria CIIE en Shanghái es la mayor vitrina de importación. ¿Cómo participan?",
+      "opts": [
+        {
+          "t": "Contratar un pabellón institucional con presencia de autoridades y ruedas de negocio",
+          "pts": 20,
+          "esg": 15
+        },
+        {
+          "t": "Participar como expositores en el pabellón internacional de PyMES",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Enviar folletos informativos a los organizadores de la feria sin asistir",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Desatender el evento comercial perdiendo visibilidad ante compradores clave",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Monitoreo de Reseñas: Comentarios en redes sociales definen el éxito o fracaso en China. ¿Cómo responden?",
+      "opts": [
+        {
+          "t": "Monitoreo activo 24/7 con equipo bilingüe en Pekín y protocolo rápido de respuesta",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Responder a comentarios negativos mediante canales estándar de la tienda",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Borrar las opiniones críticas de las plataformas sociales chinas",
+          "pts": -15,
+          "esg": -10
+        },
+        {
+          "t": "Desatender la reputación online permitiendo que las quejas se viralicen",
+          "pts": -25,
+          "esg": -15
+        }
+      ]
+    },
+    {
+      "q": "Impacto Social en Douyin: ¿Cómo comunican el impacto social positivo en la Amazonía a través de Douyin?",
+      "opts": [
+        {
+          "t": "Campañas de impacto social traducidas mostrando desarrollo de comunidades",
+          "pts": 20,
+          "esg": 25
+        },
+        {
+          "t": "Incluir códigos QR con reportes anuales de sostenibilidad corporativa",
+          "pts": 10,
+          "esg": 15
+        },
+        {
+          "t": "Utilizar mensajes generales sobre apoyo comunitario sin evidencias",
+          "pts": -5,
+          "esg": -5
+        },
+        {
+          "t": "Omitir el componente social enfocándose únicamente en la estética del envase",
+          "pts": -15,
+          "esg": -15
+        }
+      ]
+    }
+  ],
+  "Corea del Sur": [
+    {
+      "q": "Requisitos Sanitaros MFDS: La MFDS regula estrictamente claims antiedad y aclarantes. ¿Cómo procede ANDINA GLOW?",
+      "opts": [
+        {
+          "t": "Tramitar registro formal ante MFDS presentando ensayos clínicos de eficacia que respalden línea",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Homologar estudios dermatológicos colombianos mediante laboratorios asociados en Seúl",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Comercializar productos como cosmética general evitando tramitar categoría funcional",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Promocionar propiedades funcionales avanzadas sin contar con aprobación de MFDS",
+          "pts": -20,
+          "esg": -15
+        }
+      ]
+    },
+    {
+      "q": "Entrada a Olive Young: La cadena Olive Young domina el retail de belleza en Corea. ¿Cómo negocian la entrada?",
+      "opts": [
+        {
+          "t": "Alianza con el equipo de Olive Young para posicionarse en la sección de innovación limpia",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Distribuir en tiendas selectas de los distritos de Gangnam y Myeongdong",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Ofrecer los productos mediante canales e-commerce online sin tiendas físicas",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Exigir ingreso con el catálogo completo en todas las sucursales sin adaptación",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Rutinas Facial Layering: El consumidor coreano sigue rutinas de múltiples pasos. ¿Cómo adaptan el producto?",
+      "opts": [
+        {
+          "t": "Desarrollar tónicos en esencia y sérums ligeros de rápida absorción ideales para capas",
+          "pts": 20,
+          "esg": 15
+        },
+        {
+          "t": "Ofrecer una versión en emulsión fluida complementaria para el cuidado diario",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Mantener las cremas densas tradicionales de manteca de copoazú sin adaptación",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Exportar la línea corporal formulada sin evaluar la rutina facial coreana",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "App Hwahae: La app Hwahae es el juez definitivo de ingredientes en Corea. ¿Cómo la abordan?",
+      "opts": [
+        {
+          "t": "Publicar el listado INCI completo logrando calificación positiva en la plataforma Hwahae",
+          "pts": 20,
+          "esg": 15
+        },
+        {
+          "t": "Facilitar información técnica a los creadores de la comunidad Hwahae",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Ignorar la plataforma de análisis confiando en la publicidad tradicional",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Comercializar con componentes ocultos que generen calificaciones negativas en la app",
+          "pts": -20,
+          "esg": -15
+        }
+      ]
+    },
+    {
+      "q": "Registro ante la KIPO: ¿Qué resguardo legal de marcas ejecutan ante la oficina coreana (KIPO)?",
+      "opts": [
+        {
+          "t": "Registrar marca y logotipo en caracteres hangul y latinos ante la KIPO",
+          "pts": 20,
+          "esg": 5
+        },
+        {
+          "t": "Registrar el nombre comercial únicamente ante la cámara de comercio de Seúl",
+          "pts": 10,
+          "esg": 0
+        },
+        {
+          "t": "Exportar a territorio coreano sin registro formal de marcas locales",
+          "pts": -15,
+          "esg": -5
+        },
+        {
+          "t": "Confiar únicamente en el registro de marca obtenido en Colombia",
+          "pts": -25,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Sello Vegano Coreano: El mercado demandan certificaciones veganas (Korea Agency of Vegan Certification). ¿Qué hacen?",
+      "opts": [
+        {
+          "t": "Obtener la certificación oficial de la Agencia Coreana Vegana para todo el portafolio",
+          "pts": 20,
+          "esg": 15
+        },
+        {
+          "t": "Incluir sellos internacionales reconocidos de cosmética libre de crueldad",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Indicar en el empaque que el producto es natural sin certificación coreana",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Comercializar ingredientes sin verificar los estándares veganos locales",
+          "pts": -20,
+          "esg": -20
+        }
+      ]
+    },
+    {
+      "q": "K-Beauty Influencers: El mercado se mueve mediante reseñas en Naver TV y YouTube. ¿Cómo operan?",
+      "opts": [
+        {
+          "t": "Colaborar con creadores especializados en análisis de ingredientes \"Clean Skincare\"",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Enviar muestras a bloggers de belleza coreanos para reseñas de importados",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Pagar menciones en blogs comerciales sin relación con belleza limpia",
+          "pts": -15,
+          "esg": -10
+        },
+        {
+          "t": "Prescindir de estrategias de influencers confiando solo en anuncios TV",
+          "pts": -20,
+          "esg": -5
+        }
+      ]
+    },
+    {
+      "q": "Logística en Incheon: ¿Cómo estructuran la distribución eficiente en el mercado coreano?",
+      "opts": [
+        {
+          "t": "Alianzas con operadores logísticos en la zona franca de Incheon para entrega en 24h",
+          "pts": 20,
+          "esg": 5
+        },
+        {
+          "t": "Contratar un depósito logístico secundario en las afueras de Seúl",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Realizar envíos postales directos desde Colombia incrementando tiempos",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Operar sin infraestructura logística local generando demoras inaceptables",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "KakaoPay y Naver Pay: KakaoPay y Naver Pay dominan los pagos móviles en Seúl. ¿Qué integran?",
+      "opts": [
+        {
+          "t": "Integración total con KakaoPay, Naver Pay y pasarelas locales coreanas",
+          "pts": 20,
+          "esg": 5
+        },
+        {
+          "t": "Habilitar tarjetas internacionales de crédito y pasarelas globales",
+          "pts": 10,
+          "esg": 0
+        },
+        {
+          "t": "Configurar transferencias bancarias internacionales directas hacia Colombia",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Exigir pagos manuales en efectivo contra entrega ignorando métodos móviles",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Empaques Ecológicos en Seúl: El gobierno exige reducción de plásticos y empaques reciclables. ¿Cómo cumplen?",
+      "opts": [
+        {
+          "t": "Adoptar envases de papel certificado FSC y plásticos reciclados conforme a normas",
+          "pts": 20,
+          "esg": 20
+        },
+        {
+          "t": "Reducir el peso del material de empaque secundario en e-commerce",
+          "pts": 10,
+          "esg": 10
+        },
+        {
+          "t": "Utilizar envases plásticos tradicionales no reciclables en todas las líneas",
+          "pts": -10,
+          "esg": -10
+        },
+        {
+          "t": "Desatender normativas ambientales municipales arriesgando multas",
+          "pts": -20,
+          "esg": -20
+        }
+      ]
+    },
+    {
+      "q": "Estrategia de Precios Seúl: ¿Cómo determinan el valor al público en el competitivo mercado de Seúl?",
+      "opts": [
+        {
+          "t": "Posicionamiento diferenciado destacando la rareza de los activos amazónicos",
+          "pts": 20,
+          "esg": 5
+        },
+        {
+          "t": "Precio competitivo medio alineado con marcas importadas en Seúl",
+          "pts": 10,
+          "esg": 0
+        },
+        {
+          "t": "Fijar precios muy bajos para competir con marcas masivas coreanas",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Establecer precios excesivamente altos sin diferenciación técnica",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "InterCHARM Korea: La feria InterCHARM Korea es clave en Asia Oriental. ¿Cómo participan?",
+      "opts": [
+        {
+          "t": "Contratar un stand interactivo de experiencias botánicas con demostraciones",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Participar como expositores con un stand modular internacional",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Enviar catálogos impresos por correo postal a los organizadores",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Ausentarse del evento comercial perdiendo oportunidades de posicionamiento",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Bio-Ciencia Dermatológica: ¿Cómo comunican los beneficios de la biodiversidad en Corea del Sur?",
+      "opts": [
+        {
+          "t": "Campañas centradas en la sinergia entre ciencia dermatológica y extractos puros",
+          "pts": 20,
+          "esg": 15
+        },
+        {
+          "t": "Publicar infografías técnicas sobre propiedades antioxidantes de los aceites",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Utilizar eslóganes publicitarios generales sin contenido técnico",
+          "pts": -5,
+          "esg": -5
+        },
+        {
+          "t": "Omitir la narrativa científica enfocándose en afirmaciones milagrosas",
+          "pts": -15,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Soporte Inmediato Naver: Los usuarios coreanos valoran la respuesta inmediata ante dudas. ¿Cómo actúan?",
+      "opts": [
+        {
+          "t": "Establecer soporte bilingüe en Seúl con respuesta inferior a 2 horas en Naver",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Atender consultas mediante correo electrónico con soporte en inglés",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Demorar varios días en responder las preguntas en las tiendas online",
+          "pts": -15,
+          "esg": -10
+        },
+        {
+          "t": "Carecer de canales de atención locales generando reseñas negativas",
+          "pts": -25,
+          "esg": -15
+        }
+      ]
+    },
+    {
+      "q": "KIDS (Institute of Dermatological Sciences): ¿Cómo validan la eficacia de las fórmulas amazónicas?",
+      "opts": [
+        {
+          "t": "Convenio de investigación conjunta con el Korea Institute of Dermatological Sciences",
+          "pts": 20,
+          "esg": 20
+        },
+        {
+          "t": "Validar resultados colombianos mediante pruebas de parche en Seúl",
+          "pts": 10,
+          "esg": 10
+        },
+        {
+          "t": "Promocionar el producto basándose en la tradición de uso sin validación",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Publicar estudios clínicos ficticios sin respaldo de laboratorios coreanos",
+          "pts": -25,
+          "esg": -20
+        }
+      ]
+    },
+    {
+      "q": "Ediciones Cápsula de Temporada: El consumidor coreano adora las colecciones cápsula de temporada. ¿Qué implementan?",
+      "opts": [
+        {
+          "t": "Lanzar ediciones limitadas con diseño inspirado en la flora de la Amazonía",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Ofrecer descuentos especiales por tiempo limitado en los productos clave",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Mantener el inventario estándar inalterable durante todo el año",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Modificar constantemente presentaciones generando confusión en compradores",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Ley PIPA (Privacidad Digital): Corea cuenta con regulaciones estrictas de privacidad digital (PIPA). ¿Qué aplican?",
+      "opts": [
+        {
+          "t": "Adecuar los portales web al cumplimiento riguroso de la Ley PIPA",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Utilizar protocolos de seguridad estándar provistos por la plataforma",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Recopilar datos de clientes coreanos sin cifrado adaptado a la ley",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Incumplir normativas PIPA exponiendo a la empresa a sanciones severas",
+          "pts": -20,
+          "esg": -15
+        }
+      ]
+    },
+    {
+      "q": "Distribución en Provincias: ¿Cómo estructuran la expansión hacia provincias coreanas fuera de Seúl?",
+      "opts": [
+        {
+          "t": "Acuerdos de distribución exclusiva con mayoristas en Busan, Daegu e Incheon",
+          "pts": 20,
+          "esg": 5
+        },
+        {
+          "t": "Suministrar mercancía a pequeños distribuidores regionales de forma independiente",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Operar sin distribuidores locales gestionando pedidos desde Colombia",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Desatender el mercado fuera de Seúl perdiendo oportunidades territoriales",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Festividades Chuseok / Seollal: Exigen presentaciones especiales de regalo. ¿Cómo actúan?",
+      "opts": [
+        {
+          "t": "Diseñar sets de regalo exclusivos para Chuseok y Seollal con lazos tradicionales",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Ofrecer cajas decorativas de regalo estándar durante periodos festivos",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Mantener el empaque de exportación convencional sin adaptación festiva",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Ignorar las celebraciones culturales perdiendo cuota de mercado en festivos",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Naver Data Lab: El mercado de Seúl evoluciona rápidamente. ¿Cómo analizan tendencias?",
+      "opts": [
+        {
+          "t": "Utilizar Naver Data Lab para identificar demandas emergentes de activos botánicos",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Revisar informes generales de tendencias cosméticas publicados en la web",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Lanzar productos basándose solo en intuición comercial sin análisis de datos",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Desatender la evolución del mercado operando de manera estática",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "q": "Gestión de Crisis en Foros Naver: ¿Cómo neutralizan un rumor o reseña negativa en foros de Naver?",
+      "opts": [
+        {
+          "t": "Aclaración técnica inmediata respaldada por análisis independientes en Naver",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Emitir un comunicado general en la sección de atención al cliente",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Ignorar los comentarios críticos permitiendo que afecten la marca",
+          "pts": -15,
+          "esg": -10
+        },
+        {
+          "t": "Intentar censurar o bloquear perfiles de usuarios descontentos",
+          "pts": -25,
+          "esg": -15
+        }
+      ]
+    },
+    {
+      "q": "Impacto Social Transparente: ¿Cómo comunican el impacto social con comunidades amazónicas en Corea?",
+      "opts": [
+        {
+          "t": "Campañas digitales enfocadas en el empoderamiento ético de recolectoras indígenas",
+          "pts": 20,
+          "esg": 25
+        },
+        {
+          "t": "Incluir folletos informativos digitales sobre el origen sostenible de insumos",
+          "pts": 10,
+          "esg": 15
+        },
+        {
+          "t": "Utilizar mensajes generales sobre responsabilidad social sin datos verificables",
+          "pts": -5,
+          "esg": -5
+        },
+        {
+          "t": "Omitir el componente social enfocándose solo en la eficacia estética",
+          "pts": -15,
+          "esg": -15
+        }
+      ]
+    },
+    {
+      "q": "Rocket Delivery (24 Hours): El consumidor exige entregas ultrarrápidas (\"Rocket Delivery\"). ¿Qué hacen?",
+      "opts": [
+        {
+          "t": "Alianza con operadores logísticos locales para ofrecer entregas el mismo día",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Contratar mensajería estándar con tiempos de entrega de 2 a 3 días",
+          "pts": 10,
+          "esg": 0
+        },
+        {
+          "t": "Utilizar servicios postales lentos generando quejas frecuentes por demoras",
+          "pts": -15,
+          "esg": -10
+        },
+        {
+          "t": "Carecer de estrategia de entrega rápida perdiendo competitividad",
+          "pts": -25,
+          "esg": -15
+        }
+      ]
+    },
+    {
+      "q": "Respaldo Diplomático: ¿Cómo reafirman el respaldo institucional de ANDINA GLOW en Corea del Sur?",
+      "opts": [
+        {
+          "t": "Participar en eventos de la Embajada de Colombia y Cámara de Comercio en Seúl",
+          "pts": 20,
+          "esg": 10
+        },
+        {
+          "t": "Mantener contacto institucional ocasional para resolver dudas normativas",
+          "pts": 10,
+          "esg": 5
+        },
+        {
+          "t": "Operar de forma aislada sin vinculación con las misiones diplomáticas",
+          "pts": -10,
+          "esg": -5
+        },
+        {
+          "t": "Desconocer el respaldo institucional disponible arriesgando la inserción",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    }
+  ]
+};
+
+const EVENTS = {
+  "Japón": [
+    {
+      "title": "⚡ Inspección Aduanera en Yokohama",
+      "text": "La aduana retuvo el contenedor por discrepancias en etiquetado INCI.",
+      "choices": [
+        {
+          "t": "Contratar imprenta fiscal local para reetiquetado exprés",
+          "pts": -12,
+          "esg": 0
+        },
+        {
+          "t": "Devolver todo el lote a Colombia y reiniciar el proceso",
+          "pts": -25,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "title": "⚡ Tifón interrumpe logística en Osaka",
+      "text": "Un evento climático extremo paraliza temporalmente la cadena de suministro.",
+      "choices": [
+        {
+          "t": "Recurrir a depósitos secundarios de emergencia con mayor costo",
+          "pts": -10,
+          "esg": 5
+        },
+        {
+          "t": "Cancelar entregas programadas sufriendo penalizaciones",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "title": "⚡ Fluctuación del Yen (JPY)",
+      "text": "Una devaluación repentina del yen reduce los márgenes de conversión a dólares.",
+      "choices": [
+        {
+          "t": "Renegociar precios de venta en moneda local con el distribuidor",
+          "pts": -8,
+          "esg": 0
+        },
+        {
+          "t": "Absorber totalmente la pérdida cambiaria reduciendo presupuesto",
+          "pts": -15,
+          "esg": -5
+        }
+      ]
+    },
+    {
+      "title": "⚡ Nueva Regulación de Microplásticos",
+      "text": "El gobierno nipón restringe componentes de empaque sintéticos.",
+      "choices": [
+        {
+          "t": "Sustituir tapas plásticas por madera sostenible certificada",
+          "pts": -10,
+          "esg": 15
+        },
+        {
+          "t": "Pagar multa ambiental temporal mientras se agota el inventario",
+          "pts": -18,
+          "esg": -15
+        }
+      ]
+    },
+    {
+      "title": "⚡ Saturación en Puertos de Tokio",
+      "text": "Demoras operativas retienen mercancía en la terminal internacional.",
+      "choices": [
+        {
+          "t": "Pagar sobrecosto de almacenaje frigorífico prioritario",
+          "pts": -12,
+          "esg": 0
+        },
+        {
+          "t": "Dejar el contenedor en patio abierto arriesgando temperatura",
+          "pts": -22,
+          "esg": -15
+        }
+      ]
+    },
+    {
+      "title": "⚡ Alerta de Alérgenos no Declarados",
+      "text": "Un cliente reporta sensibilidad cutánea sospechosa en un lote.",
+      "choices": [
+        {
+          "t": "Retirar preventivamente el lote y realizar auditoría clínica independiente",
+          "pts": -15,
+          "esg": 15
+        },
+        {
+          "t": "Negar la responsabilidad atribuyendo el problema al uso indebido",
+          "pts": -25,
+          "esg": -25
+        }
+      ]
+    }
+  ],
+  "Alemania": [
+    {
+      "title": "⚡ Huelga de Estibadores en Hamburgo",
+      "text": "Los puertos alemanes paralizan operaciones por reclamos laborales.",
+      "choices": [
+        {
+          "t": "Desviar la carga marítima hacia el puerto de Róterdam",
+          "pts": -14,
+          "esg": 0
+        },
+        {
+          "t": "Esperar en alta mar acumulando costos de estadía",
+          "pts": -22,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "title": "⚡ Auditoría del Registro CPNP",
+      "text": "La UE solicita aclarar un aditivo botánico en la plataforma CPNP.",
+      "choices": [
+        {
+          "t": "Contratar bufete químico alemán para ratificar el dossier",
+          "pts": -10,
+          "esg": 5
+        },
+        {
+          "t": "Pausar ventas en territorio europeo hasta la revisión anual",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "title": "⚡ Incremento en Tarifas Duales VerpackG",
+      "text": "Alemania elevó las tarifas de reciclaje para empaques importados.",
+      "choices": [
+        {
+          "t": "Pagar la tasa adicional de reciclaje manteniendo estándares",
+          "pts": -10,
+          "esg": 10
+        },
+        {
+          "t": "Reducir la calidad del envase exterior para aminorar costos",
+          "pts": -18,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "title": "⚡ Bloqueo Ferroviario en el Corredor Verde",
+      "text": "Un choque logístico interrumpe el transporte de carga ecológico.",
+      "choices": [
+        {
+          "t": "Contratar camiones eléctricos de reparto de emergencia",
+          "pts": -12,
+          "esg": 10
+        },
+        {
+          "t": "Utilizar transporte diésel convencional de alta emisión",
+          "pts": -15,
+          "esg": -15
+        }
+      ]
+    },
+    {
+      "title": "⚡ Inspección por Etiquetado Vegan V-Label",
+      "text": "Un organismo de control solicita reevaluar el origen de los excipientes.",
+      "choices": [
+        {
+          "t": "Enviar certificados de origen vegano de laboratorios colombianos",
+          "pts": -8,
+          "esg": 10
+        },
+        {
+          "t": "Retirar el sello V-Label temporalmente de los folletos",
+          "pts": -16,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "title": "⚡ Crisis de Inflación Energética en Europa",
+      "text": "El costo de almacenamiento climatizado en Alemania aumenta 30%.",
+      "choices": [
+        {
+          "t": "Asumir el aumento de tarifas logísticas de refrigeración",
+          "pts": -12,
+          "esg": 5
+        },
+        {
+          "t": "Trasladar stock a depósitos no climatizados de menor costo",
+          "pts": -20,
+          "esg": -15
+        }
+      ]
+    }
+  ],
+  "Emiratos Árabes Unidos": [
+    {
+      "title": "⚡ Falla en Sistema de Refrigeración",
+      "text": "Una ola de calor extremo dañó la climatización en puerto de Dubái.",
+      "choices": [
+        {
+          "t": "Destruir el lote afectado y reemplazar con envío aéreo urgente",
+          "pts": -18,
+          "esg": 5
+        },
+        {
+          "t": "Comercializar el inventario ligeramente expuesto a calor",
+          "pts": -25,
+          "esg": -20
+        }
+      ]
+    },
+    {
+      "title": "⚡ Actualización de Requisitos Halal ESMA",
+      "text": "La autoridad emiratí exige nueva auditoría a plantas en origen.",
+      "choices": [
+        {
+          "t": "Costear la visita técnica de certificadores de EAU a Colombia",
+          "pts": -15,
+          "esg": 10
+        },
+        {
+          "t": "Pausar la comercialización Halal durante el año fiscal",
+          "pts": -24,
+          "esg": -15
+        }
+      ]
+    },
+    {
+      "title": "⚡ Congestión Aduanera en Jebel Ali",
+      "text": "Aumento masivo de carga genera demoras de dos semanas en puerto.",
+      "choices": [
+        {
+          "t": "Transferir la carga a la zona franca DMCC en transporte express",
+          "pts": -12,
+          "esg": 0
+        },
+        {
+          "t": "Esperar la liberación normal incurriendo en quiebre de stock",
+          "pts": -20,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "title": "⚡ Cambio Normativo en Aranceles de Zonas Francas",
+      "text": "Nuevas tarifas fiscales aplican sobre productos reexportados.",
+      "choices": [
+        {
+          "t": "Reestructurar el modelo logístico con agente fiscal local",
+          "pts": -10,
+          "esg": 5
+        },
+        {
+          "t": "Asumir multas retroactivas por falta de adecuación oportuna",
+          "pts": -22,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "title": "⚡ Crisis de Transporte en el Estrecho de Ormuz",
+      "text": "Tensiones geopolíticas elevan los seguros de flete marítimo.",
+      "choices": [
+        {
+          "t": "Pagar la sobretasa de seguro de riesgo de guerra en fletes",
+          "pts": -14,
+          "esg": 0
+        },
+        {
+          "t": "Suspender envíos marítimos hasta la normalización de la ruta",
+          "pts": -25,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "title": "⚡ Discrepancia en la Traducción al Árabe",
+      "text": "Una errata en la etiqueta en árabe altera el significado de los activos.",
+      "choices": [
+        {
+          "t": "Reetiquetar todo el lote en bodega autorizada en Dubái",
+          "pts": -10,
+          "esg": 5
+        },
+        {
+          "t": "Colocar adhesivos correctivos manuales sobre el empaque de lujo",
+          "pts": -18,
+          "esg": -10
+        }
+      ]
+    }
+  ],
+  "Estados Unidos": [
+    {
+      "title": "⚡ Auditoría Sorpresa de la FDA (MoCRA)",
+      "text": "La agencia exige inspeccionar las instalaciones del fabricante.",
+      "choices": [
+        {
+          "t": "Financiar viaje de peritos y auditoría técnica in situ",
+          "pts": -16,
+          "esg": 10
+        },
+        {
+          "t": "Negarse a la inspección perdiendo acceso al mercado",
+          "pts": -30,
+          "esg": -25
+        }
+      ]
+    },
+    {
+      "title": "⚡ Bloqueo Preventivo en Puerto de Miami",
+      "text": "La aduana de EE.UU. retuvo la carga para verificación de origen del TLC.",
+      "choices": [
+        {
+          "t": "Enviar documentación digitalizada con agente aduanal acreditado",
+          "pts": -10,
+          "esg": 5
+        },
+        {
+          "t": "Pagar arancel regular para acelerar la liberación del inventario",
+          "pts": -20,
+          "esg": -5
+        }
+      ]
+    },
+    {
+      "title": "⚡ Modificación de la Proposición 65 en California",
+      "text": "Se incluye un nuevo compuesto botánico en la lista de revisión.",
+      "choices": [
+        {
+          "t": "Imprimir etiquetas especiales de advertencia para envíos a California",
+          "pts": -10,
+          "esg": 10
+        },
+        {
+          "t": "Dejar de abastecer al mercado de California temporalmente",
+          "pts": -18,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "title": "⚡ Crisis Logística en Depósitos Amazon FBA",
+      "text": "Límites de almacenamiento impiden ingresar nuevos lotes en temporada.",
+      "choices": [
+        {
+          "t": "Contratar un almacén 3PL externo en Florida para amortiguar stock",
+          "pts": -12,
+          "esg": 5
+        },
+        {
+          "t": "Pausar las ventas digitales en la plataforma Amazon",
+          "pts": -22,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "title": "⚡ Disputa de Marca por Competidor Local",
+      "text": "Una firma estadounidense exige modificar el nombre publicitario.",
+      "choices": [
+        {
+          "t": "Llegar a un acuerdo extrajudicial defensivo con asesoría legal",
+          "pts": -15,
+          "esg": 0
+        },
+        {
+          "t": "Ir a juicio federal en EE.UU. arriesgando altos costos judiciales",
+          "pts": -28,
+          "esg": -15
+        }
+      ]
+    },
+    {
+      "title": "⚡ Inspección por Trabajo Forzoso (UFLPA)",
+      "text": "La autoridad aduanera solicita certificar la recolección de açaí.",
+      "choices": [
+        {
+          "t": "Entregar auditoría social de tercera parte realizada en la Amazonía",
+          "pts": -12,
+          "esg": 20
+        },
+        {
+          "t": "No presentar pruebas a tiempo sufriendo la incautación del lote",
+          "pts": -26,
+          "esg": -25
+        }
+      ]
+    }
+  ],
+  "China": [
+    {
+      "title": "⚡ Retención de Expediente NMPA",
+      "text": "La agencia sanitaria frena la aprobación por falta de datos botánicos.",
+      "choices": [
+        {
+          "t": "Contratar toxicólogos adicionales para complementar dossier",
+          "pts": -15,
+          "esg": 5
+        },
+        {
+          "t": "Vender por canales grises clandestinos (Daigou)",
+          "pts": -28,
+          "esg": -25
+        }
+      ]
+    },
+    {
+      "title": "⚡ Suspensión de Cuentas en WeChat Pay",
+      "text": "Un cambio en políticas de pago transfronterizo bloquea cobros.",
+      "choices": [
+        {
+          "t": "Migrar la tienda virtual a una pasarela local certificada",
+          "pts": -12,
+          "esg": 0
+        },
+        {
+          "t": "Pausar las ventas digitales en el ecosistema chino",
+          "pts": -22,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "title": "⚡ Cierre Temporal de la Zona Franca de Shanghái",
+      "text": "Protocolos de desinfección sanitaria retrasan salidas de bodega.",
+      "choices": [
+        {
+          "t": "Reorientar despachos hacia la zona franca de Ningbo",
+          "pts": -14,
+          "esg": 0
+        },
+        {
+          "t": "Esperar la apertura acumulando demurrage y demoras",
+          "pts": -24,
+          "esg": -10
+        }
+      ]
+    },
+    {
+      "title": "⚡ Ciberataque a Plataforma Tmall Partner",
+      "text": "Una filtración de datos afecta el sistema del socio operador local.",
+      "choices": [
+        {
+          "t": "Financiar auditoría de ciberseguridad y actualizar parches",
+          "pts": -10,
+          "esg": 10
+        },
+        {
+          "t": "Ocultar el incidente a los usuarios chinos arriesgando sanciones",
+          "pts": -25,
+          "esg": -25
+        }
+      ]
+    },
+    {
+      "title": "⚡ Multa por Exceso de Embalaje",
+      "text": "La autoridad de mercado en Pekín sanciona el grosor de las cajas.",
+      "choices": [
+        {
+          "t": "Rediseñar empaques inmediatos con cartón monomaterial eco",
+          "pts": -12,
+          "esg": 15
+        },
+        {
+          "t": "Impugnar la sanción en tribunales estatales arriesgando veto",
+          "pts": -20,
+          "esg": -15
+        }
+      ]
+    },
+    {
+      "title": "⚡ Rumor Malicioso en Redes Douyin",
+      "text": "Una campaña de difamación ataca la pureza del aceite de buriti.",
+      "choices": [
+        {
+          "t": "Publicar resultados de laboratorio oficial en video con KOLs",
+          "pts": -14,
+          "esg": 10
+        },
+        {
+          "t": "Borrar los comentarios sin emitir explicaciones oficiales",
+          "pts": -22,
+          "esg": -20
+        }
+      ]
+    }
+  ],
+  "Corea del Sur": [
+    {
+      "title": "⚡ Filtración en App Hwahae",
+      "text": "Reseñas masivas penalizan un ingrediente en la comunidad coreana.",
+      "choices": [
+        {
+          "t": "Lanzar comunicado técnico aclaratorio y reformular lote",
+          "pts": -14,
+          "esg": 10
+        },
+        {
+          "t": "Ignorar las críticas en la app perdiendo posicionamiento",
+          "pts": -24,
+          "esg": -18
+        }
+      ]
+    },
+    {
+      "title": "⚡ Reclasificación por la MFDS",
+      "text": "La agencia sanitaria exige registrar la crema como cosmético funcional.",
+      "choices": [
+        {
+          "t": "Presentar ensayos clínicos adicionales ante la MFDS",
+          "pts": -15,
+          "esg": 10
+        },
+        {
+          "t": "Retirar las afirmaciones antiedad del empaque en Corea",
+          "pts": -10,
+          "esg": -5
+        }
+      ]
+    },
+    {
+      "title": "⚡ Paro Logístico de Entregas Rápidas en Seúl",
+      "text": "Una huelga de mensajeros urbanos paraliza las entregas el mismo día.",
+      "choices": [
+        {
+          "t": "Contratar red de mensajería privada alternativa con sobrecosto",
+          "pts": -12,
+          "esg": 5
+        },
+        {
+          "t": "Aceptar demoras de entrega perdiendo reputación en Naver",
+          "pts": -20,
+          "esg": -15
+        }
+      ]
+    },
+    {
+      "title": "⚡ Falsificación Detectada en Mercado Abierto",
+      "text": "Copias no autorizadas de ANDINA GLOW circulan en plataformas informales.",
+      "choices": [
+        {
+          "t": "Iniciar acciones legales con la oficina KIPO e integrar hologramas",
+          "pts": -15,
+          "esg": 10
+        },
+        {
+          "t": "Ignorar las copias confiando en que el cliente reconocerá la original",
+          "pts": -25,
+          "esg": -20
+        }
+      ]
+    },
+    {
+      "title": "⚡ Nueva Tasa Ambiental sobre Plásticos en Seúl",
+      "text": "El gobierno municipal impone gravamen adicional a envases importados.",
+      "choices": [
+        {
+          "t": "Transicionar a envases de resina biodegradable certificada",
+          "pts": -10,
+          "esg": 20
+        },
+        {
+          "t": "Absorber el impuesto reduciendo el presupuesto publicitario",
+          "pts": -16,
+          "esg": -5
+        }
+      ]
+    },
+    {
+      "title": "⚡ Cancelación de Evento en Olive Young",
+      "text": "Un problema de espacio en anaquel cancela el lanzamiento exclusivo.",
+      "choices": [
+        {
+          "t": "Negociar presencia en tiendas de Gangnam con campaña Pop-up",
+          "pts": -12,
+          "esg": 5
+        },
+        {
+          "t": "Cancelar la campaña física enfocándose solo en canal online",
+          "pts": -18,
+          "esg": -10
+        }
+      ]
+    }
+  ]
+};
+
+const PESTEL = {
+  'Japón': [
+    { letter: 'P', name: 'Político', text: 'Estabilidad democrática. Relación bilateral sólida.', source: 'Cancillería' },
+    { letter: 'E', name: 'Económico', text: 'Tercera economía global. Alto poder adquisitivo.', source: 'Banco Mundial' },
+    { letter: 'S', name: 'Social', text: 'Alta exigencia en calidad y cultura Omotenashi.', source: 'JETRO' },
+    { letter: 'T', name: 'Tecnológico', text: 'E-commerce maduro integrado a Line Pay.', source: 'Nikkei' },
+    { letter: 'E', name: 'Ecológico', text: 'Cultura Mottainai y estándares estrictos de reciclaje.', source: 'MOE Japan' },
+    { letter: 'L', name: 'Legal', text: 'Regulación MHLW y estándar JAS obligatorio.', source: 'MHLW' }
+  ],
+  'Alemania': [
+    { letter: 'P', name: 'Político', text: 'Estabilidad en mercado único europeo.', source: 'EU Com' },
+    { letter: 'E', name: 'Económico', text: 'Primera economía de la UE y consumo consciente.', source: 'Destatis' },
+    { letter: 'S', name: 'Social', text: 'Orientado a marcas éticas, veganas y Clean Beauty.', source: 'Statista' },
+    { letter: 'T', name: 'Tecnológico', text: 'Digitalización avanzada y trazabilidad por QR.', source: 'BMWK' },
+    { letter: 'E', name: 'Ecológico', text: 'Ley VerpackG y sellos COSMOS u Öko-Test.', source: 'UBA' },
+    { letter: 'L', name: 'Legal', text: 'Notificación CPNP y Reglamento alérgenos UE.', source: 'EU Reg' }
+  ],
+  'Emiratos Árabes Unidos': [
+    { letter: 'P', name: 'Político', text: 'Estabilidad federal y tratados CEPA.', source: 'UAE Gov' },
+    { letter: 'E', name: 'Económico', text: 'Elevado PIB per cápita y mercado de lujo.', source: 'FMI' },
+    { letter: 'S', name: 'Social', text: 'Población multicultural con preferencia Halal.', source: 'Dubai Chamber' },
+    { letter: 'T', name: 'Tecnológico', text: 'Adopción de pagos digitales como Telr y Apple Pay.', source: 'Smart Dubai' },
+    { letter: 'E', name: 'Ecológico', text: 'Estrategia Visión 2030 con protección térmica.', source: 'MOEI' },
+    { letter: 'L', name: 'Legal', text: 'Certificación Halal y registro en plataforma ESMA.', source: 'ESMA' }
+  ],
+  'Estados Unidos': [
+    { letter: 'P', name: 'Político', text: 'Marco federal con TLC vigente desde 2012.', source: 'USTR' },
+    { letter: 'E', name: 'Económico', text: 'Principal mercado de consumo global.', source: 'BEA' },
+    { letter: 'S', name: 'Social', text: 'Tendencia Clean Beauty y transparencia.', source: 'Nielsen' },
+    { letter: 'T', name: 'Tecnológico', text: 'E-commerce dominado por Amazon FBA.', source: 'NRF' },
+    { letter: 'E', name: 'Ecológico', text: 'Regulaciones estrictas como Prop 65 en California.', source: 'EPA' },
+    { letter: 'L', name: 'Legal', text: 'Normativa MoCRA FDA y reglas FTC.', source: 'FDA' }
+  ],
+  'China': [
+    { letter: 'P', name: 'Político', text: 'Supervisión estatal y políticas de importación.', source: 'MOFCOM' },
+    { letter: 'E', name: 'Económico', text: 'Mercado cosmético con auge en belleza limpia.', source: 'NBS China' },
+    { letter: 'S', name: 'Social', text: 'Gen-Z impulsada por live-streaming.', source: 'iResearch' },
+    { letter: 'T', name: 'Tecnológico', text: 'Ecosistema de súper-apps WeChat y Douyin.', source: 'TechNode' },
+    { letter: 'E', name: 'Ecológico', text: 'Leyes contra empaques excesivos.', source: 'MEE China' },
+    { letter: 'L', name: 'Legal', text: 'Registro sanitario NMPA estricto.', source: 'NMPA' }
+  ],
+  'Corea del Sur': [
+    { letter: 'P', name: 'Político', text: 'Apoyo gubernamental a exportaciones globales.', source: 'KOTRA' },
+    { letter: 'E', name: 'Económico', text: 'Epicentro K-Beauty y cuidado de la piel.', source: 'Bank of Korea' },
+    { letter: 'S', name: 'Social', text: 'Consumidores expertos en fórmulas bio.', source: 'Trend Monitor' },
+    { letter: 'T', name: 'Tecnológico', text: 'Líderes en Beauty-Tech e IA dermatológica.', source: 'Korea IT News' },
+    { letter: 'E', name: 'Ecológico', text: 'Alta demanda de cosmética vegana.', source: 'Korea Env. Inst' },
+    { letter: 'L', name: 'Legal', text: 'Normativa MFDS para cosméticos funcionales.', source: 'MFDS' }
+  ]
+};
+
+function shuffleDeck(items) {
+  const deck = [...items];
+  for (let i = deck.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [deck[i], deck[j]] = [deck[j], deck[i]];
+  }
+  return deck;
+}
+
+// Cada mercado conserva su propio mazo: no se mezclan preguntas ni eventos entre países.
+// No hay repetición hasta agotar las 24 preguntas o los 6 eventos del mercado seleccionado.
+function getUniqueQuestion(market) {
+  const pool = QUESTIONS_DATABASE[market] || QUESTIONS_DATABASE['Japón'];
+  if (!STATE.askedQuestionsPool[market] || STATE.askedQuestionsPool[market].length === 0) {
+    STATE.askedQuestionsPool[market] = shuffleDeck(pool);
+  }
+  return STATE.askedQuestionsPool[market].pop();
+}
+
+function getUniqueEvent(market) {
+  const pool = EVENTS[market] || EVENTS['Japón'];
+  if (!STATE.askedEventsPool[market] || STATE.askedEventsPool[market].length === 0) {
+    STATE.askedEventsPool[market] = shuffleDeck(pool);
+  }
+  return STATE.askedEventsPool[market].pop();
+}
+
+let globalAudioCtx = null;
+let spanishVoice = null;
+function getAudioCtx() {
+  if (globalAudioCtx) return globalAudioCtx;
+  try { const AudioCtx = window.AudioContext || window.webkitAudioContext; if (AudioCtx) globalAudioCtx = new AudioCtx(); } catch(e){}
+  return globalAudioCtx;
+}
+function unlockAudio() { const ctx = getAudioCtx(); if (ctx && ctx.state === 'suspended') ctx.resume(); }
+function loadVoices() {
+  if (!('speechSynthesis' in window)) return;
+  const voices = window.speechSynthesis.getVoices();
+  spanishVoice = voices.find(v => v.lang && v.lang.toLowerCase().startsWith('es')) || voices[0];
+}
+if ('speechSynthesis' in window) { window.speechSynthesis.onvoiceschanged = loadVoices; loadVoices(); }
+function speak(text, force = false) {
+  if (!STATE.voiceEnabled && !force) return;
+  if (!('speechSynthesis' in window)) return;
+  try {
+    unlockAudio(); window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'es-ES'; u.rate = 0.98;
+    if (spanishVoice) u.voice = spanishVoice;
+    window.speechSynthesis.speak(u);
+  } catch(e){}
+}
+function stopSpeaking() { if ('speechSynthesis' in window) { try { window.speechSynthesis.cancel(); } catch(e){} } }
+
+function playSelectSound() {
+  const ctx = getAudioCtx(); if (!ctx || STATE.muted) return;
+  try {
+    const o = ctx.createOscillator(); const g = ctx.createGain();
+    o.type = 'triangle'; o.frequency.setValueAtTime(600, ctx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(1100, ctx.currentTime + 0.1);
+    g.gain.setValueAtTime(0.15, ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+    o.connect(g); g.connect(ctx.destination); o.start(); o.stop(ctx.currentTime + 0.13);
+  } catch(e){}
+}
+function playCorrectSound() {
+  const ctx = getAudioCtx(); if (!ctx || STATE.muted) return;
+  try {
+    const now = ctx.currentTime;
+    [523.25, 659.25, 783.99].forEach((freq, i) => {
+      const o = ctx.createOscillator(); const g = ctx.createGain();
+      o.type = 'sine'; o.frequency.setValueAtTime(freq, now + i * 0.08);
+      g.gain.setValueAtTime(0.15, now + i * 0.08); g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.2);
+      o.connect(g); g.connect(ctx.destination); o.start(now + i * 0.08); o.stop(now + i * 0.08 + 0.22);
+    });
+  } catch(e){}
+}
+function playWrongSound() {
+  const ctx = getAudioCtx(); if (!ctx || STATE.muted) return;
+  try {
+    const now = ctx.currentTime; const o = ctx.createOscillator(); const g = ctx.createGain();
+    o.type = 'sawtooth'; o.frequency.setValueAtTime(220, now); o.frequency.exponentialRampToValueAtTime(110, now + 0.3);
+    g.gain.setValueAtTime(0.15, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+    o.connect(g); g.connect(ctx.destination); o.start(now); o.stop(now + 0.35);
+  } catch(e){}
+}
+
+function faceSVG(mood, color, index = 0) {
+  const skins = ['#ffdbac', '#f1c27d', '#e0ac69', '#8d5524'];
+  const skin = skins[index % skins.length];
+  let mouthPath = "M 22 42 Q 32 48 42 42";
+  if (mood === 'happy') mouthPath = "M 20 38 Q 32 52 44 38";
+  if (mood === 'sad') mouthPath = "M 20 44 Q 32 36 44 44";
+  if (mood === 'winner') mouthPath = "M 18 36 Q 32 56 46 36 Z";
+
+  return `
+  <svg class="face-svg" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="32" cy="32" r="28" fill="${color}" stroke="#ffffff" stroke-width="2"/>
+    <path d="M 16 58 Q 32 48 48 58 L 48 62 L 16 62 Z" fill="#1e293b" />
+    <circle cx="32" cy="32" r="20" fill="${skin}"/>
+    <circle cx="24" cy="28" r="2.5" fill="#1e293b"/>
+    <circle cx="40" cy="28" r="2.5" fill="#1e293b"/>
+    <path d="${mouthPath}" stroke="#1e293b" stroke-width="2.5" fill="${mood === 'winner' ? '#ef4444' : 'none'}" stroke-linecap="round"/>
+  </svg>`;
+}
+
+function showScreen(id) {
+  stopSpeaking();
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const target = document.getElementById(id);
+  if (target) target.classList.add('active');
+}
+
+function renderPlayersSetup() {
+  const container = document.getElementById('playersSetup');
+  if (!container) return;
+  container.innerHTML = '';
+  const defaults = ['Estratega 1', 'Estratega 2', 'Estratega 3', 'Estratega 4'];
+  for (let i = 0; i < 4; i++) {
+    container.innerHTML += `
+      <div class="glass-card p-3 text-center">
+        <div class="w-12 h-12 mx-auto mb-2">${faceSVG('neutral', PLAYER_COLORS[i], i)}</div>
+        <label class="block text-[10px] text-slate-400 font-orbitron uppercase mb-1">Jugador ${i + 1}</label>
+        <input type="text" id="playerName${i}" value="${defaults[i]}" class="w-full bg-slate-900 border border-slate-700 text-slate-100 text-xs text-center rounded p-1.5 focus:border-amber-400 outline-none">
+      </div>`;
+  }
+}
+
+function savePlayers() {
+  STATE.players = [];
+  for (let i = 0; i < 4; i++) {
+    const input = document.getElementById('playerName' + i);
+    const val = input && input.value.trim() ? input.value.trim() : 'Jugador ' + (i + 1);
+    STATE.players.push({ name: val.slice(0, 16), color: PLAYER_COLORS[i], capital: INITIAL_CAPITAL, esg: INITIAL_ESG, position: 0, mood: 'neutral', finished: false });
+  }
+}
+
+function setupChoices() {
+  document.querySelectorAll('.diff-btn').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected'); STATE.difficulty = btn.dataset.diff; playSelectSound();
+    };
+  });
+  document.querySelectorAll('.market-btn').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('.market-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected'); STATE.market = btn.dataset.market;
+      document.body.setAttribute('data-theme', STATE.market); playSelectSound();
+      speak('Mercado seleccionado: ' + STATE.market);
+    };
+  });
+  document.querySelectorAll('.entry-btn').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('.entry-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected'); STATE.entry = btn.dataset.entry; playSelectSound();
+      speak('Modo de entrada: ' + STATE.entry, true);
+    };
+  });
+  document.querySelectorAll('.incoterm-btn').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('.incoterm-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected'); STATE.incoterm = btn.dataset.incoterm;
+      document.getElementById('incotermName').textContent = 'INCOTERM ' + STATE.incoterm;
+      document.getElementById('incotermPros').textContent = btn.dataset.pros;
+      document.getElementById('incotermCons').textContent = btn.dataset.cons;
+      document.getElementById('incotermInfoBox').classList.remove('hidden');
+      playSelectSound(); speak(`Incoterm ${STATE.incoterm}. Ventajas: ${btn.dataset.pros}`, true);
+    };
+  });
+}
+
+function setupTooltips() {
+  const tooltip = document.getElementById('globalTooltip');
+  document.addEventListener('mouseover', e => {
+    const target = e.target.closest('.has-tooltip');
+    if (target) {
+      tooltip.textContent = target.dataset.tooltip; tooltip.classList.remove('hidden');
+      const rect = target.getBoundingClientRect();
+      tooltip.style.top = (rect.bottom + window.scrollY + 5) + 'px';
+      tooltip.style.left = (rect.left + window.scrollX) + 'px';
+    }
+  });
+  document.addEventListener('mouseout', e => { if (e.target.closest('.has-tooltip')) tooltip.classList.add('hidden'); });
+}
+
+function buildBoard() {
+  const board = document.getElementById('board');
+  if (!board) return; board.innerHTML = '';
+  for (let i = 0; i < STATE.totalCells; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'cell h-16 p-1 text-center'; cell.dataset.index = i;
+    let type = (i === STATE.totalCells - 1) ? 'final' : (i % 4 === 2 ? 'event' : 'decision');
+    cell.dataset.type = type;
+    cell.innerHTML = `
+      <span class="absolute top-1 left-1 text-[9px] text-slate-500 font-orbitron">${i + 1}</span>
+      <span class="text-sm mt-1">${type === 'final' ? '🏁' : (type === 'event' ? '⚡' : '❓')}</span>
+      <div class="flex gap-0.5 justify-center mt-1" id="tokens-${i}"></div>`;
+    board.appendChild(cell);
+  }
+}
+
+function movePlayer(playerIdx, steps) {
+  const player = STATE.players[playerIdx];
+  if (!player || player.finished) return;
+  const targetPosition = Math.min(player.position + steps, STATE.totalCells - 1);
+  let currentStep = player.position;
+
+  function stepAnim() {
+    if (currentStep < targetPosition) {
+      currentStep++; player.position = currentStep;
+      renderTokens(); renderPlayersPanel(); playSelectSound();
+      const cell = document.querySelector(`.cell[data-index="${currentStep}"]`);
+      if (cell) { cell.classList.add('active-cell'); setTimeout(() => cell.classList.remove('active-cell'), 350); }
+      setTimeout(stepAnim, 450);
+    } else {
+      if (player.position >= STATE.totalCells - 1) { player.finished = true; player.mood = 'happy'; checkGameEnd(); }
+      else { resolveCell(playerIdx); }
+    }
+  }
+  stepAnim();
+}
+
+function renderTokens() {
+  document.querySelectorAll('[id^="tokens-"]').forEach(c => c.innerHTML = '');
+  STATE.players.forEach((p, idx) => {
+    const c = document.getElementById('tokens-' + p.position);
+    if (!c) return;
+    const t = document.createElement('div');
+    t.className = 'token-avatar shadow-md'; t.style.borderColor = p.color;
+    t.innerHTML = faceSVG(p.mood, p.color, idx); c.appendChild(t);
+  });
+}
+
+function renderPlayersPanel() {
+  const p = document.getElementById('playersPanel');
+  if (!p) return; p.innerHTML = '';
+  STATE.players.forEach((pl, i) => {
+    p.innerHTML += `
+      <div class="p-2 rounded-xl flex items-center justify-between border ${i === STATE.currentTurn ? 'bg-amber-400/15 border-amber-400' : 'bg-slate-900/40 border-slate-800'}">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 flex-shrink-0">${faceSVG(pl.mood, pl.color, i)}</div>
+          <span class="text-xs font-bold text-slate-200 truncate max-w-[90px]">${pl.name}</span>
+        </div>
+        <div class="text-right">
+          <div class="font-orbitron text-xs font-bold text-amber-400">${pl.capital} 💰</div>
+          <div class="w-16 h-1.5 bg-slate-800 rounded-full mt-1 overflow-hidden" title="ESG: ${pl.esg}%">
+            <div class="h-full bg-emerald-400" style="width:${pl.esg}%"></div>
+          </div>
+        </div>
+      </div>`;
+  });
+}
+
+function rollDice() {
+  if (STATE.diceRolling || STATE.gameOver) return;
+  STATE.diceRolling = true; playSelectSound();
+  const dice = document.getElementById('mainDice'); dice.classList.add('rolling');
+  let spin = 0; const faces = ['⚀', '⚁', '⚂', '⚃'];
+  const interval = setInterval(() => { dice.textContent = faces[Math.floor(Math.random() * faces.length)]; spin++; if (spin > 12) clearInterval(interval); }, 80);
+  setTimeout(() => {
+    const res = Math.floor(Math.random() * 4) + 1;
+    dice.textContent = faces[res - 1]; dice.classList.remove('rolling');
+    STATE.diceRolling = false; movePlayer(STATE.currentTurn, res);
+  }, 1400);
+}
+
+function resolveCell(playerIdx) {
+  const cell = document.querySelector(`.cell[data-index="${STATE.players[playerIdx].position}"]`);
+  if (cell && cell.dataset.type === 'event') showEvent(playerIdx);
+  else showDecision(playerIdx);
+}
+
+function showDecision(playerIdx) {
+  const player = STATE.players[playerIdx];
+  const decision = getUniqueQuestion(STATE.market);
+  const modal = document.getElementById('questionModal');
+  document.getElementById('questionTitle').textContent = `Casilla ${player.position + 1} — Turno de: ${player.name}`;
+  document.getElementById('questionText').textContent = decision.q; speak(decision.q);
+
+  const answers = document.getElementById('answers'); answers.innerHTML = '';
+  const feedback = document.getElementById('questionFeedback'); feedback.className = 'p-3 rounded-lg text-sm font-bold hidden';
+
+  const shuffledOpts = [...decision.opts].sort(() => Math.random() - 0.5);
+
+  shuffledOpts.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn w-full text-left text-xs sm:text-sm'; btn.textContent = opt.t;
+    btn.onclick = () => {
+      stopSpeaking();
+      answers.querySelectorAll('button').forEach(b => b.disabled = true);
+      const mult = opt.pts < 0 ? DIFFICULTY_MULT[STATE.difficulty] : 1.0;
+      const ptsFinal = Math.round(opt.pts * mult);
+      player.capital = Math.max(0, player.capital + ptsFinal);
+      player.esg = Math.min(100, Math.max(0, player.esg + (opt.esg || 0)));
+
+      if (ptsFinal >= 0) {
+        playCorrectSound(); player.mood = 'happy';
+        feedback.className = 'p-3 rounded-lg text-sm font-bold block bg-emerald-950/80 text-emerald-300 border border-emerald-500';
+        feedback.textContent = `✅ Capital Estratégico: +${ptsFinal} | Sostenibilidad ESG: ${opt.esg > 0 ? '+' : ''}${opt.esg || 0}%`;
+      } else {
+        playWrongSound(); player.mood = 'sad';
+        feedback.className = 'p-3 rounded-lg text-sm font-bold block bg-rose-950/80 text-rose-300 border border-rose-500';
+        feedback.textContent = `❌ Penalización: ${ptsFinal} Capital | Sostenibilidad ESG: ${opt.esg}%`;
+      }
+      renderPlayersPanel(); setTimeout(() => { modal.classList.remove('open'); nextTurn(); }, 2200);
+    };
+    answers.appendChild(btn);
+  });
+  modal.classList.add('open');
+}
+
+function showEvent(playerIdx) {
+  const player = STATE.players[playerIdx];
+  const ev = getUniqueEvent(STATE.market);
+  const modal = document.getElementById('eventModal');
+  document.getElementById('eventTitle').textContent = ev.title;
+  document.getElementById('eventText').textContent = ev.text; speak(ev.title + '. ' + ev.text);
+
+  const choices = document.getElementById('eventChoices'); choices.innerHTML = '';
+  const feedback = document.getElementById('eventFeedback'); feedback.className = 'p-3 rounded-lg text-sm font-bold hidden';
+
+  ev.choices.forEach(ch => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn w-full text-left text-xs sm:text-sm'; btn.textContent = ch.t;
+    btn.onclick = () => {
+      stopSpeaking();
+      choices.querySelectorAll('button').forEach(b => b.disabled = true);
+      const mult = DIFFICULTY_MULT[STATE.difficulty];
+      const ptsFinal = Math.round(ch.pts * mult);
+      player.capital = Math.max(0, player.capital + ptsFinal);
+      player.esg = Math.min(100, Math.max(0, player.esg + (ch.esg || 0)));
+
+      if (ptsFinal >= 0) {
+        playCorrectSound(); player.mood = 'happy';
+        feedback.className = 'p-3 rounded-lg text-sm font-bold block bg-emerald-950/80 text-emerald-300 border border-emerald-500';
+        feedback.textContent = `🟢 ¡Beneficio en Evento! Capital: +${ptsFinal} | ESG: ${ch.esg >= 0 ? '+' : ''}${ch.esg || 0}%`;
+      } else {
+        playWrongSound(); player.mood = 'sad';
+        feedback.className = 'p-3 rounded-lg text-sm font-bold block bg-rose-950/80 text-rose-300 border border-rose-500';
+        feedback.textContent = `🔴 ¡Impacto Negativo en Evento! Capital: ${ptsFinal} | ESG: ${ch.esg}%`;
+      }
+      renderPlayersPanel(); setTimeout(() => { modal.classList.remove('open'); nextTurn(); }, 2200);
+    };
+    choices.appendChild(btn);
+  });
+  modal.classList.add('open');
+}
+
+function nextTurn() {
+  stopSpeaking();
+  const alive = STATE.players.filter(p => !p.finished);
+  if (alive.length === 0) { endGame(); return; }
+  do { STATE.currentTurn = (STATE.currentTurn + 1) % STATE.players.length; } while (STATE.players[STATE.currentTurn].finished);
+  if (STATE.currentTurn === 0) STATE.year++;
+  document.getElementById('yearInfo').textContent = 'Año: ' + Math.min(STATE.year, 2035);
+  document.getElementById('turnName').textContent = STATE.players[STATE.currentTurn].name;
+  renderPlayersPanel(); renderTokens();
+}
+
+function checkGameEnd() { if (STATE.players.every(p => p.finished)) endGame(); else nextTurn(); }
+
+function renderPestel() {
+  const grid = document.getElementById('pestelGrid'); if (!grid) return;
+  document.getElementById('pestelCountryName').textContent = STATE.market || 'Japón';
+  const data = PESTEL[STATE.market] || PESTEL['Japón'];
+  grid.innerHTML = '';
+  data.forEach(f => {
+    grid.innerHTML += `
+      <div class="glass-card p-4 text-left">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="w-7 h-7 flex items-center justify-center bg-amber-400 text-slate-950 font-black font-orbitron rounded-md">${f.letter}</span>
+          <strong class="font-orbitron text-amber-400 text-xs uppercase">${f.name}</strong>
+        </div>
+        <p class="text-xs text-slate-300 leading-relaxed mb-2">${f.text}</p>
+        <span class="text-[10px] text-slate-500 italic block border-t border-slate-800 pt-1">Fuente: ${f.source}</span>
+      </div>`;
+  });
+}
+
+function readPestel() {
+  const data = PESTEL[STATE.market] || PESTEL['Japón'];
+  speak(`Diagnóstico PESTEL para ${STATE.market}. ` + data.map(d => `${d.name}: ${d.text}`).join('. '), true);
+}
+
+function endGame() {
+  STATE.gameOver = true; stopSpeaking(); showScreen('screenFinal');
+  const sorted = STATE.players.slice().sort((a, b) => (b.capital + b.esg) - (a.capital + a.esg));
+  const podium = document.getElementById('podium'); podium.innerHTML = '';
+  sorted.forEach((p, idx) => {
+    podium.innerHTML += `
+      <div class="glass-card p-4 text-center min-w-[120px] border-amber-400/40">
+        <div class="text-2xl mb-1">${['🥇','🥈','🥉','4º'][idx]}</div>
+        <strong class="font-orbitron text-xs block text-slate-200 mb-1">${p.name}</strong>
+        <div class="font-orbitron text-amber-400 font-bold text-sm">${p.capital} 💰</div>
+        <small class="text-[10px] text-emerald-400">ESG: ${p.esg}%</small>
+      </div>`;
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderPlayersSetup(); setupChoices(); setupTooltips();
+  document.getElementById('coverNextBtn').onclick = () => {
+    unlockAudio();
+    showScreen('screenIntro');
+    speak("Bienvenidos a Reto Interbiz 2035. ANDINA GLOW busca conquistar los mercados globales con cosmética natural amazónica.", true);
+  };
+  document.getElementById('startBtn').onclick = () => { stopSpeaking(); showScreen('screenPlayers'); };
+  document.getElementById('continuePlayersBtn').onclick = () => { savePlayers(); showScreen('screenSetup'); };
+  document.getElementById('startGameBtn').onclick = () => {
+    if (!STATE.market || !STATE.entry || !STATE.incoterm) { alert('Selecciona Mercado, Estrategia e Incoterm.'); return; }
+    renderPestel(); showScreen('screenPestel');
+  };
+  document.getElementById('backPestelBtn').onclick = () => showScreen('screenSetup');
+  document.getElementById('readPestelBtn').onclick = () => readPestel();
+  document.getElementById('continuePestelBtn').onclick = () => {
+    stopSpeaking();
+    const incotermBtn = document.querySelector('.incoterm-btn.selected');
+    const bonus = (ENTRY_EFFECTS[STATE.entry] || 0) + (incotermBtn ? parseInt(incotermBtn.dataset.cap, 10) : 0);
+    STATE.players.forEach(p => p.capital += bonus);
+    document.getElementById('marketInfo').textContent = 'Mercado: ' + STATE.market;
+    document.getElementById('entryInfo').textContent = 'Entrada: ' + STATE.entry;
+    document.getElementById('incotermInfo').textContent = 'Incoterm: ' + STATE.incoterm;
+    document.getElementById('diffInfo').textContent = 'Dificultad: ' + STATE.difficulty;
+    document.getElementById('turnName').textContent = STATE.players[0].name;
+    buildBoard(); renderPlayersPanel(); renderTokens();
+    document.getElementById('mainDice').onclick = () => { if (!STATE.diceRolling && !STATE.gameOver) rollDice(); };
+    showScreen('screenGame');
+  };
+  document.getElementById('muteBtn').onclick = () => {
+    STATE.voiceEnabled = !STATE.voiceEnabled; STATE.muted = !STATE.voiceEnabled;
+    if (!STATE.voiceEnabled) stopSpeaking();
+    document.getElementById('muteBtn').textContent = STATE.voiceEnabled ? '🔊 Voz/SFX' : '🔇 Mudo';
+  };
+  document.getElementById('restartBtn').onclick = () => location.reload();
+  document.getElementById('playAgainBtn').onclick = () => location.reload();
+});
+</script>
+</body>
+</html>
